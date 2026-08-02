@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "primeiros-passos",
+  "curriculumId": "M01-L01",
+  "moduleId": "M01",
+  "level": "iniciante",
+  "order": 1,
+  "prerequisites": [],
+  "eyebrow": "Fundamentos do terminal",
+  "title": "Onde estou?",
+  "summary": "Aprenda a se localizar, enxergar o conteúdo de uma pasta e navegar entre diretórios.",
+  "duration": "5 min",
+  "objective": "Usar pwd, ls e cd para explorar o seu ambiente Linux com confiança.",
+  "concepts": [
+    "O terminal sempre trabalha dentro de um diretório atual.",
+    "Caminhos informam onde arquivos e pastas estão localizados."
+  ],
+  "examples": [
+    {
+      "command": "pwd",
+      "explanation": "Mostra o caminho completo do diretório atual."
+    },
+    {
+      "command": "ls",
+      "explanation": "Lista os arquivos e diretórios disponíveis aqui."
+    },
+    {
+      "command": "cd projetos",
+      "explanation": "Entra no diretório chamado projetos."
+    }
+  ],
+  "taskIntro": "Explore a sua pasta pessoal e termine a tarefa dentro do diretório projetos.",
+  "steps": [
+    "Descubra em qual diretório você está.",
+    "Liste o conteúdo desse diretório.",
+    "Entre no diretório projetos."
+  ],
+  "hints": [
+    "Comece executando o comando que significa print working directory.",
+    "Use ls para localizar a pasta projetos.",
+    "Para entrar na pasta, execute cd projetos."
+  ],
+  "startingDirectory": "/home/aluno",
+  "setupCommand": "mkdir -p /home/aluno/projetos /home/aluno/Downloads && printf 'Seu ambiente de prática está pronto.\\n' > /home/aluno/boas-vindas.txt",
+  "checks": [
+    {
+      "id": "used-pwd",
+      "label": "Você descobriu o diretório atual com pwd",
+      "command": "grep -Eq '^[[:space:]]*pwd([[:space:]]|$)' /home/aluno/.lesson_history",
+      "failureMessage": "Ainda não encontrei o comando pwd no histórico desta sessão."
+    },
+    {
+      "id": "used-ls",
+      "label": "Você listou o conteúdo do diretório com ls",
+      "command": "grep -Eq '^[[:space:]]*ls([[:space:]]|$)' /home/aluno/.lesson_history",
+      "failureMessage": "Execute ls para observar os arquivos e diretórios disponíveis."
+    },
+    {
+      "id": "entered-projects",
+      "label": "Você entrou no diretório projetos",
+      "command": "grep -Eq '^[[:space:]]*cd[[:space:]]+(\\./)?projetos/?[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "O histórico ainda não mostra a entrada no diretório projetos."
+    }
+  ],
+  "smokeCommands": [
+    "pwd",
+    "ls",
+    "cd projetos"
+  ]
+}

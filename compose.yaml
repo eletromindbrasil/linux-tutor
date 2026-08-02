@@ -1,0 +1,38 @@
+services:
+  sandbox-image:
+    image: linux-tutor-sandbox:local
+    build:
+      context: .
+      dockerfile: Dockerfile.sandbox
+    command: ["true"]
+    restart: "no"
+
+  app:
+    image: linux-tutor-app:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      sandbox-image:
+        condition: service_completed_successfully
+    environment:
+      PORT: "4173"
+      SESSION_IMAGE: linux-tutor-sandbox:local
+      DOCKER_SOCKET: /var/run/docker.sock
+      LESSONS_PATH: /app/content/lessons
+    ports:
+      - "127.0.0.1:4173:4173"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./content:/app/content:ro
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:4173/api/health').then(response => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped

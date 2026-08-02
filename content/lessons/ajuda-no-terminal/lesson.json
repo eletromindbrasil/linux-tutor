@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "ajuda-no-terminal",
+  "curriculumId": "M01-L04",
+  "moduleId": "M01",
+  "level": "iniciante",
+  "order": 4,
+  "prerequisites": ["listagens-detalhadas"],
+  "eyebrow": "Fundamentos do terminal",
+  "title": "Pergunte ao próprio Linux",
+  "summary": "Descubra o tipo de um comando e consulte ajuda rápida, manual e busca por assunto.",
+  "duration": "8 min",
+  "objective": "Encontrar documentação local sem depender de memorizar todas as opções dos comandos.",
+  "concepts": [
+    "type informa se um nome é builtin, alias ou executável.",
+    "--help oferece uma referência rápida e man apresenta o manual completo.",
+    "apropos procura comandos relacionados a uma palavra-chave."
+  ],
+  "examples": [
+    {
+      "command": "type cd",
+      "explanation": "Mostra que cd é um comando interno do shell."
+    },
+    {
+      "command": "ls --help",
+      "explanation": "Exibe um resumo das opções disponíveis para ls."
+    },
+    {
+      "command": "man ls",
+      "explanation": "Abre a página de manual do comando ls."
+    },
+    {
+      "command": "apropos directory",
+      "explanation": "Busca páginas de manual relacionadas a diretórios."
+    }
+  ],
+  "taskIntro": "Use as ferramentas de ajuda local para investigar cd e ls e procurar comandos sobre diretórios.",
+  "steps": [
+    "Descubra que tipo de comando é cd.",
+    "Consulte a ajuda rápida de ls.",
+    "Leia a página de manual de ls.",
+    "Pesquise páginas relacionadas à palavra directory."
+  ],
+  "hints": [
+    "O primeiro comando começa com type.",
+    "Muitos executáveis aceitam a opção longa --help.",
+    "As páginas de manual são abertas com man seguido do comando.",
+    "apropos recebe uma palavra em inglês e procura descrições relacionadas."
+  ],
+  "startingDirectory": "/home/aluno",
+  "setupCommand": "man -w ls >/dev/null && apropos directory >/dev/null && printf 'Consulte a documentação antes de tentar adivinhar opções.\\n' > /home/aluno/LEIA-ME.txt",
+  "checks": [
+    {
+      "id": "type-cd",
+      "label": "Você identificou o tipo do comando cd",
+      "command": "grep -Eq '^[[:space:]]*type[[:space:]]+cd[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute type cd para descobrir como o shell interpreta esse nome."
+    },
+    {
+      "id": "quick-help",
+      "label": "Você consultou a ajuda rápida de ls",
+      "command": "grep -Eq '^[[:space:]]*ls[[:space:]]+--help[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute ls --help para consultar o resumo de opções."
+    },
+    {
+      "id": "manual-page",
+      "label": "Você abriu o manual de ls",
+      "command": "grep -Eq '^[[:space:]]*man[[:space:]]+ls[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute man ls para consultar a página de manual."
+    },
+    {
+      "id": "apropos-search",
+      "label": "Você pesquisou documentação por assunto",
+      "command": "grep -Eq '^[[:space:]]*apropos[[:space:]]+directory[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute apropos directory para pesquisar manuais relacionados."
+    }
+  ],
+  "smokeCommands": [
+    "type cd",
+    "ls --help",
+    "man ls",
+    "apropos directory"
+  ]
+}

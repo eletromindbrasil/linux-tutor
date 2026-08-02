@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "id": "links-linux",
+  "curriculumId": "M02-L04",
+  "moduleId": "M02",
+  "level": "iniciante",
+  "order": 8,
+  "prerequisites": ["remocao-segura"],
+  "eyebrow": "Links no sistema de arquivos",
+  "title": "Crie links simbólicos e físicos",
+  "summary": "Compare atalhos simbólicos com nomes adicionais que apontam para o mesmo inode.",
+  "duration": "10 min",
+  "objective": "Criar e inspecionar um link simbólico e um hard link com ln, readlink e ls -li.",
+  "concepts": [
+    "Um link simbólico guarda um caminho para outro arquivo e pode atravessar sistemas de arquivos.",
+    "Um hard link é outro nome para o mesmo inode e, por isso, compartilha o mesmo conteúdo."
+  ],
+  "examples": [
+    {
+      "command": "ln -s ../originais/config.txt atalhos/config-atual",
+      "explanation": "Cria um link simbólico cujo destino é guardado como caminho relativo."
+    },
+    {
+      "command": "ln originais/config.txt copias/config-reserva",
+      "explanation": "Cria um hard link para o mesmo inode do arquivo original."
+    },
+    {
+      "command": "ls -li arquivo copia",
+      "explanation": "Exibe o número do inode para comparar os dois nomes."
+    }
+  ],
+  "taskIntro": "Crie duas formas de acessar a configuração original e depois investigue como cada link funciona.",
+  "steps": [
+    "Crie o link simbólico atalhos/config-atual apontando relativamente para ../originais/config.txt.",
+    "Crie o hard link copias/config-reserva a partir de originais/config.txt.",
+    "Use readlink atalhos/config-atual para ver o caminho armazenado no link simbólico.",
+    "Use ls -li originais/config.txt copias/config-reserva para comparar os inodes."
+  ],
+  "hints": [
+    "Use ln -s para criar um link simbólico.",
+    "Sem a opção -s, ln cria um hard link.",
+    "O caminho ../originais/config.txt é relativo ao diretório atalhos.",
+    "Números de inode iguais confirmam que os dois nomes são hard links."
+  ],
+  "startingDirectory": "/home/aluno/links",
+  "setupCommand": "mkdir -p /home/aluno/links/{originais,atalhos,copias} && printf 'tema=escuro\\n' > /home/aluno/links/originais/config.txt",
+  "checks": [
+    {
+      "id": "symbolic-link-created",
+      "label": "O link simbólico foi criado",
+      "command": "test -L /home/aluno/links/atalhos/config-atual",
+      "failureMessage": "Crie atalhos/config-atual usando ln -s."
+    },
+    {
+      "id": "relative-target-correct",
+      "label": "O link simbólico guarda o caminho relativo solicitado",
+      "command": "test \"$(readlink /home/aluno/links/atalhos/config-atual)\" = '../originais/config.txt'",
+      "failureMessage": "O destino do link deve ser exatamente ../originais/config.txt."
+    },
+    {
+      "id": "hard-link-created",
+      "label": "A cópia de reserva aponta para o mesmo inode",
+      "command": "test -f /home/aluno/links/copias/config-reserva && test \"$(stat -c %i /home/aluno/links/originais/config.txt)\" = \"$(stat -c %i /home/aluno/links/copias/config-reserva)\"",
+      "failureMessage": "Crie copias/config-reserva com ln, sem usar a opção -s."
+    },
+    {
+      "id": "used-symbolic-link-command",
+      "label": "Você praticou ln -s",
+      "command": "grep -Eq '^[[:space:]]*ln[[:space:]]+-s[[:space:]]+\\.\\./originais/config\\.txt[[:space:]]+atalhos/config-atual[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Use ln -s ../originais/config.txt atalhos/config-atual."
+    },
+    {
+      "id": "inspected-symbolic-link",
+      "label": "Você inspecionou o link com readlink",
+      "command": "grep -Eq '^[[:space:]]*readlink[[:space:]]+atalhos/config-atual[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute readlink atalhos/config-atual para ver o destino armazenado."
+    },
+    {
+      "id": "compared-inodes",
+      "label": "Você comparou os inodes com ls -li",
+      "command": "grep -Eq '^[[:space:]]*ls[[:space:]]+-li[[:space:]]+originais/config\\.txt[[:space:]]+copias/config-reserva[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Use ls -li originais/config.txt copias/config-reserva para comparar os inodes."
+    }
+  ],
+  "smokeCommands": [
+    "ln -s ../originais/config.txt atalhos/config-atual",
+    "ln originais/config.txt copias/config-reserva",
+    "readlink atalhos/config-atual",
+    "ls -li originais/config.txt copias/config-reserva"
+  ]
+}

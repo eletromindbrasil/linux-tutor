@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "copiar-mover-renomear",
+  "curriculumId": "M02-L02",
+  "moduleId": "M02",
+  "level": "iniciante",
+  "order": 6,
+  "prerequisites": ["arquivos-e-pastas"],
+  "eyebrow": "Organização de arquivos",
+  "title": "Copie, mova e renomeie",
+  "summary": "Organize arquivos com cp e mv, entendendo quando o original é preservado ou muda de lugar.",
+  "duration": "9 min",
+  "objective": "Usar cp e mv para criar uma cópia, mover um arquivo e renomeá-lo com segurança.",
+  "concepts": [
+    "cp cria uma nova cópia e mantém o arquivo de origem no lugar.",
+    "mv muda um arquivo de diretório e também é usado para renomeá-lo."
+  ],
+  "examples": [
+    {
+      "command": "cp relatorio.txt backup/relatorio.txt",
+      "explanation": "Copia relatorio.txt para o diretório backup sem remover o original."
+    },
+    {
+      "command": "mv foto.jpg imagens/foto.jpg",
+      "explanation": "Move foto.jpg para o diretório imagens."
+    },
+    {
+      "command": "mv antigo.txt novo.txt",
+      "explanation": "Renomeia antigo.txt para novo.txt no mesmo diretório."
+    }
+  ],
+  "taskIntro": "A pasta entrada recebeu um rascunho e uma planilha. Faça uma cópia de segurança do rascunho e organize a planilha em documentos.",
+  "steps": [
+    "Copie entrada/rascunho.txt para backup/rascunho.txt.",
+    "Mova entrada/dados.csv para documentos/dados.csv.",
+    "Renomeie documentos/dados.csv para documentos/clientes.csv.",
+    "Use ls -R para conferir a organização final."
+  ],
+  "hints": [
+    "Use cp entrada/rascunho.txt backup/rascunho.txt.",
+    "O primeiro mv leva dados.csv até documentos.",
+    "Um segundo mv pode trocar apenas o nome do arquivo.",
+    "Execute ls -R no diretório atual para ver todas as subpastas."
+  ],
+  "startingDirectory": "/home/aluno/organizacao",
+  "setupCommand": "mkdir -p /home/aluno/organizacao/{entrada,documentos,backup} && printf 'rascunho inicial\\n' > /home/aluno/organizacao/entrada/rascunho.txt && printf 'nome,email\\nAna,ana@example.test\\n' > /home/aluno/organizacao/entrada/dados.csv",
+  "checks": [
+    {
+      "id": "draft-copied",
+      "label": "O rascunho foi copiado sem alterar o original",
+      "command": "test -f /home/aluno/organizacao/backup/rascunho.txt && cmp -s /home/aluno/organizacao/entrada/rascunho.txt /home/aluno/organizacao/backup/rascunho.txt",
+      "failureMessage": "Copie entrada/rascunho.txt para backup/rascunho.txt e mantenha o original em entrada."
+    },
+    {
+      "id": "data-renamed",
+      "label": "A planilha agora se chama clientes.csv",
+      "command": "test -f /home/aluno/organizacao/documentos/clientes.csv",
+      "failureMessage": "Não encontrei documentos/clientes.csv. Mova a planilha e depois renomeie o arquivo."
+    },
+    {
+      "id": "old-data-paths-absent",
+      "label": "Os nomes antigos da planilha não permaneceram",
+      "command": "test ! -e /home/aluno/organizacao/entrada/dados.csv && test ! -e /home/aluno/organizacao/documentos/dados.csv",
+      "failureMessage": "A planilha ainda está em um dos caminhos antigos. Conclua as duas operações com mv."
+    },
+    {
+      "id": "used-cp",
+      "label": "Você praticou o comando cp",
+      "command": "grep -Eq '^[[:space:]]*cp[[:space:]]+entrada/rascunho\\.txt[[:space:]]+backup/rascunho\\.txt[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Use cp para fazer a cópia do rascunho como solicitado."
+    },
+    {
+      "id": "used-mv",
+      "label": "Você praticou o comando mv",
+      "command": "grep -Eq '^[[:space:]]*mv[[:space:]]+' /home/aluno/.lesson_history",
+      "failureMessage": "Use mv para mover e renomear a planilha."
+    }
+  ],
+  "smokeCommands": [
+    "cp entrada/rascunho.txt backup/rascunho.txt",
+    "mv entrada/dados.csv documentos/dados.csv",
+    "mv documentos/dados.csv documentos/clientes.csv",
+    "ls -R"
+  ]
+}

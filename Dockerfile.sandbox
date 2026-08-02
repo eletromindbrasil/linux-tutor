@@ -1,0 +1,13 @@
+FROM debian:bookworm-slim
+
+RUN sed -i '/\/usr\/share\/man\/\*/d' /etc/dpkg/dpkg.cfg.d/docker \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends man-db manpages \
+    && apt-get install -y --reinstall coreutils \
+    && mandb --quiet \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --shell /bin/bash aluno
+USER aluno
+WORKDIR /home/aluno
+
+CMD ["sleep", "infinity"]

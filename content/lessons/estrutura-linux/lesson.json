@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "estrutura-linux",
+  "curriculumId": "M02-L05",
+  "moduleId": "M02",
+  "level": "iniciante",
+  "order": 9,
+  "prerequisites": ["links-linux"],
+  "eyebrow": "Estrutura do Linux",
+  "title": "Explore os diretórios essenciais",
+  "summary": "Visite áreas importantes do sistema e associe cada diretório ao seu papel habitual.",
+  "duration": "9 min",
+  "objective": "Reconhecer a finalidade básica de /etc, /var, /tmp e /home sem modificar arquivos do sistema.",
+  "concepts": [
+    "/etc concentra configurações do sistema, enquanto /home contém os diretórios pessoais dos usuários.",
+    "/var guarda dados variáveis, como logs, e /tmp oferece espaço para arquivos temporários."
+  ],
+  "examples": [
+    {
+      "command": "ls /",
+      "explanation": "Lista os diretórios que começam na raiz do sistema de arquivos."
+    },
+    {
+      "command": "ls /etc",
+      "explanation": "Mostra nomes de arquivos e diretórios usados para configuração."
+    },
+    {
+      "command": "cat /etc/os-release",
+      "explanation": "Exibe informações de identificação da distribuição Linux."
+    }
+  ],
+  "taskIntro": "Faça uma visita guiada, somente para leitura, por alguns diretórios essenciais do Linux.",
+  "steps": [
+    "Liste a raiz do sistema com ls /.",
+    "Explore as configurações com ls /etc.",
+    "Observe a área de logs com ls /var/log.",
+    "Confira o diretório temporário com ls /tmp.",
+    "Leia a identificação da distribuição com cat /etc/os-release."
+  ],
+  "hints": [
+    "Caminhos que começam com / são absolutos.",
+    "Nesta lição você não precisa criar, editar ou remover nada.",
+    "Use exatamente os comandos de leitura apresentados nas etapas.",
+    "O arquivo os-release é texto simples e pode ser lido com cat."
+  ],
+  "startingDirectory": "/home/aluno",
+  "setupCommand": "printf 'Nesta visita, apenas observe os diretórios do sistema.\\n' > /home/aluno/LEIA-ME.txt",
+  "checks": [
+    {
+      "id": "listed-root",
+      "label": "Você listou a raiz do sistema",
+      "command": "grep -Eq '^[[:space:]]*ls[[:space:]]+/[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute ls / para observar a raiz do sistema."
+    },
+    {
+      "id": "explored-etc",
+      "label": "Você explorou o diretório de configurações",
+      "command": "grep -Eq '^[[:space:]]*ls[[:space:]]+/etc/?[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute ls /etc."
+    },
+    {
+      "id": "explored-logs",
+      "label": "Você observou o diretório de logs",
+      "command": "grep -Eq '^[[:space:]]*ls[[:space:]]+/var/log/?[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute ls /var/log."
+    },
+    {
+      "id": "explored-temp",
+      "label": "Você observou o diretório temporário",
+      "command": "grep -Eq '^[[:space:]]*ls[[:space:]]+/tmp/?[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute ls /tmp."
+    },
+    {
+      "id": "read-os-release",
+      "label": "Você identificou a distribuição do laboratório",
+      "command": "grep -Eq '^[[:space:]]*cat[[:space:]]+/etc/os-release[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute cat /etc/os-release."
+    }
+  ],
+  "smokeCommands": [
+    "ls /",
+    "ls /etc",
+    "ls /var/log",
+    "ls /tmp",
+    "cat /etc/os-release"
+  ]
+}

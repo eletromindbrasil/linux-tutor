@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "arquivos-e-pastas",
+  "curriculumId": "M02-L01",
+  "moduleId": "M02",
+  "level": "iniciante",
+  "order": 5,
+  "prerequisites": ["ajuda-no-terminal"],
+  "eyebrow": "Arquivos e diretórios",
+  "title": "Crie seu espaço de prática",
+  "summary": "Crie uma pasta, grave uma mensagem em um arquivo e confira o resultado no terminal.",
+  "duration": "8 min",
+  "objective": "Combinar mkdir, cd, touch, echo e cat em uma pequena tarefa real.",
+  "concepts": [
+    "mkdir cria diretórios e touch pode criar arquivos vazios.",
+    "O operador > direciona a saída de um comando para um arquivo."
+  ],
+  "examples": [
+    {
+      "command": "mkdir notas",
+      "explanation": "Cria um novo diretório chamado notas."
+    },
+    {
+      "command": "touch texto.txt",
+      "explanation": "Cria um arquivo vazio chamado texto.txt."
+    },
+    {
+      "command": "echo \"Olá\" > texto.txt",
+      "explanation": "Grava a palavra Olá dentro do arquivo."
+    },
+    {
+      "command": "cat texto.txt",
+      "explanation": "Mostra o conteúdo atual do arquivo."
+    }
+  ],
+  "taskIntro": "Monte uma pasta de prática e registre nela um lembrete para continuar estudando.",
+  "steps": [
+    "Crie um diretório chamado pratica e entre nele.",
+    "Crie um arquivo vazio chamado lembrete.txt.",
+    "Grave exatamente: Treinar um pouco todos os dias.",
+    "Mostre o conteúdo do arquivo no terminal."
+  ],
+  "hints": [
+    "Você pode começar com mkdir pratica e depois cd pratica.",
+    "Use touch lembrete.txt para criar o arquivo vazio.",
+    "Execute echo \"Treinar um pouco todos os dias.\" > lembrete.txt.",
+    "Use cat lembrete.txt para conferir o conteúdo."
+  ],
+  "startingDirectory": "/home/aluno",
+  "setupCommand": "printf 'Crie seus arquivos neste diretório.\\n' > /home/aluno/LEIA-ME.txt",
+  "checks": [
+    {
+      "id": "practice-directory",
+      "label": "O diretório pratica foi criado",
+      "command": "test -d /home/aluno/pratica",
+      "failureMessage": "Não encontrei o diretório /home/aluno/pratica."
+    },
+    {
+      "id": "reminder-file",
+      "label": "O arquivo lembrete.txt existe dentro de pratica",
+      "command": "test -f /home/aluno/pratica/lembrete.txt",
+      "failureMessage": "Crie lembrete.txt dentro do diretório pratica."
+    },
+    {
+      "id": "reminder-content",
+      "label": "O lembrete contém a mensagem solicitada",
+      "command": "grep -Fxq 'Treinar um pouco todos os dias.' /home/aluno/pratica/lembrete.txt",
+      "failureMessage": "O conteúdo de lembrete.txt ainda não corresponde à frase da tarefa."
+    },
+    {
+      "id": "read-reminder",
+      "label": "Você conferiu o arquivo usando cat",
+      "command": "grep -Eq '^[[:space:]]*cat[[:space:]]+([^[:space:]]*/)?lembrete\\.txt[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Use cat lembrete.txt para mostrar a mensagem no terminal."
+    }
+  ],
+  "smokeCommands": [
+    "mkdir pratica",
+    "cd pratica",
+    "touch lembrete.txt",
+    "echo \"Treinar um pouco todos os dias.\" > lembrete.txt",
+    "cat lembrete.txt"
+  ]
+}

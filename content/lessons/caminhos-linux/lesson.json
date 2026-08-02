@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "id": "caminhos-linux",
+  "curriculumId": "M01-L02",
+  "moduleId": "M01",
+  "level": "iniciante",
+  "order": 2,
+  "prerequisites": ["primeiros-passos"],
+  "eyebrow": "Fundamentos do terminal",
+  "title": "Encontre o caminho",
+  "summary": "Use caminhos relativos, absolutos e atalhos para se mover sem depender do diretório atual.",
+  "duration": "7 min",
+  "objective": "Distinguir caminhos relativos e absolutos e navegar usando ponto, dois-pontos e til.",
+  "concepts": [
+    "Um caminho relativo começa no diretório em que você está.",
+    "Um caminho absoluto começa em / e aponta para um local sem depender do contexto.",
+    "Os atalhos .. e ~ representam o diretório pai e a pasta pessoal."
+  ],
+  "examples": [
+    {
+      "command": "cd projetos/site/src",
+      "explanation": "Percorre um caminho relativo a partir da pasta atual."
+    },
+    {
+      "command": "cd ..",
+      "explanation": "Volta um nível para o diretório pai."
+    },
+    {
+      "command": "cd /home/aluno",
+      "explanation": "Vai diretamente a um caminho absoluto."
+    },
+    {
+      "command": "cd ~/projetos/site",
+      "explanation": "Usa ~ como atalho para a pasta pessoal."
+    }
+  ],
+  "taskIntro": "Percorra a estrutura do projeto usando cada forma de caminho pelo menos uma vez.",
+  "steps": [
+    "Entre em projetos/site/src usando um caminho relativo e confirme a localização com pwd.",
+    "Volte para site usando dois-pontos.",
+    "Retorne a /home/aluno usando o caminho absoluto.",
+    "Entre novamente em projetos/site usando o atalho ~."
+  ],
+  "hints": [
+    "Você começa em /home/aluno, então projetos está logo abaixo do diretório atual.",
+    "Dois pontos, escritos como .., representam o diretório pai.",
+    "Um caminho absoluto desta lição começa com /home/aluno.",
+    "O caractere ~ pode substituir /home/aluno."
+  ],
+  "startingDirectory": "/home/aluno",
+  "setupCommand": "mkdir -p /home/aluno/projetos/site/src /home/aluno/documentos && printf 'Projeto de exemplo\\n' > /home/aluno/projetos/site/README.md",
+  "checks": [
+    {
+      "id": "relative-path",
+      "label": "Você entrou em projetos/site/src com caminho relativo",
+      "command": "grep -Eq '^[[:space:]]*cd[[:space:]]+projetos/site/src/?[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Use cd projetos/site/src enquanto estiver em /home/aluno."
+    },
+    {
+      "id": "confirmed-path",
+      "label": "Você confirmou a localização com pwd",
+      "command": "grep -Eq '^[[:space:]]*pwd[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Execute pwd depois de entrar no diretório src."
+    },
+    {
+      "id": "parent-path",
+      "label": "Você navegou para o diretório pai usando ..",
+      "command": "grep -Eq '^[[:space:]]*cd[[:space:]]+\\.\\.[/]?[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Use cd .. para retornar um nível."
+    },
+    {
+      "id": "absolute-path",
+      "label": "Você usou o caminho absoluto /home/aluno",
+      "command": "grep -Eq '^[[:space:]]*cd[[:space:]]+/home/aluno/?[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Retorne à pasta pessoal executando cd /home/aluno."
+    },
+    {
+      "id": "home-shortcut",
+      "label": "Você navegou usando o atalho ~",
+      "command": "grep -Eq '^[[:space:]]*cd[[:space:]]+~/projetos/site/?[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Entre no site com cd ~/projetos/site."
+    }
+  ],
+  "smokeCommands": [
+    "cd projetos/site/src",
+    "pwd",
+    "cd ..",
+    "cd /home/aluno",
+    "cd ~/projetos/site"
+  ]
+}

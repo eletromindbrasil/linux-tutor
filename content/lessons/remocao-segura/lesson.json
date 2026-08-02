@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "id": "remocao-segura",
+  "curriculumId": "M02-L03",
+  "moduleId": "M02",
+  "level": "iniciante",
+  "order": 7,
+  "prerequisites": ["copiar-mover-renomear"],
+  "eyebrow": "Remoção consciente",
+  "title": "Remova somente o necessário",
+  "summary": "Pratique rm e rmdir em uma área controlada, conferindo os alvos antes de apagar.",
+  "duration": "8 min",
+  "objective": "Distinguir a remoção de arquivos, diretórios vazios e diretórios com conteúdo.",
+  "concepts": [
+    "rm remove arquivos e normalmente não oferece uma lixeira para recuperação.",
+    "rmdir remove apenas diretórios vazios; rm -r percorre e remove todo o conteúdo de um diretório."
+  ],
+  "examples": [
+    {
+      "command": "rm arquivo.tmp",
+      "explanation": "Remove um arquivo depois que você conferiu o nome e o caminho."
+    },
+    {
+      "command": "rmdir pasta-vazia",
+      "explanation": "Remove um diretório somente se ele estiver vazio."
+    },
+    {
+      "command": "rm -r arquivos-antigos",
+      "explanation": "Remove o diretório e tudo que existe dentro dele; exige atenção redobrada."
+    }
+  ],
+  "taskIntro": "Faça uma limpeza seletiva no laboratório. Apague os itens temporários, mas preserve o arquivo importante.",
+  "steps": [
+    "Use ls -R para inspecionar toda a área antes de remover algo.",
+    "Remova somente temporarios/cache.tmp com rm.",
+    "Remova pasta-vazia usando rmdir.",
+    "Remova o diretório rascunhos e seu conteúdo usando rm -r.",
+    "Não remova preservar/importante.txt."
+  ],
+  "hints": [
+    "Comece com ls -R e leia cada caminho com atenção.",
+    "O arquivo temporario pode ser removido com rm temporarios/cache.tmp.",
+    "Como pasta-vazia não tem arquivos, use rmdir pasta-vazia.",
+    "Para o diretório com conteúdo, use rm -r rascunhos."
+  ],
+  "startingDirectory": "/home/aluno/limpeza",
+  "setupCommand": "mkdir -p /home/aluno/limpeza/{temporarios,pasta-vazia,rascunhos,preservar} && printf 'cache descartavel\\n' > /home/aluno/limpeza/temporarios/cache.tmp && printf 'sessao ativa\\n' > /home/aluno/limpeza/temporarios/sessao.tmp && printf 'versao antiga\\n' > /home/aluno/limpeza/rascunhos/antigo.txt && printf 'NAO APAGAR\\n' > /home/aluno/limpeza/preservar/importante.txt",
+  "checks": [
+    {
+      "id": "cache-removed",
+      "label": "O arquivo cache.tmp foi removido",
+      "command": "test ! -e /home/aluno/limpeza/temporarios/cache.tmp",
+      "failureMessage": "O arquivo temporarios/cache.tmp ainda existe."
+    },
+    {
+      "id": "empty-directory-removed",
+      "label": "O diretório vazio foi removido",
+      "command": "test ! -e /home/aluno/limpeza/pasta-vazia",
+      "failureMessage": "Use rmdir para remover pasta-vazia."
+    },
+    {
+      "id": "drafts-removed",
+      "label": "O diretório rascunhos foi removido com seu conteúdo",
+      "command": "test ! -e /home/aluno/limpeza/rascunhos",
+      "failureMessage": "Use rm -r para remover o diretório rascunhos."
+    },
+    {
+      "id": "important-preserved",
+      "label": "O arquivo importante foi preservado",
+      "command": "grep -Fxq 'NAO APAGAR' /home/aluno/limpeza/preservar/importante.txt",
+      "failureMessage": "O arquivo preservar/importante.txt foi alterado ou removido. Reinicie a lição para tentar novamente."
+    },
+    {
+      "id": "used-selective-removal",
+      "label": "Você usou rm no arquivo solicitado",
+      "command": "grep -Eq '^[[:space:]]*rm[[:space:]]+temporarios/cache\\.tmp[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Remova cache.tmp com rm temporarios/cache.tmp."
+    },
+    {
+      "id": "used-rmdir",
+      "label": "Você praticou rmdir em um diretório vazio",
+      "command": "grep -Eq '^[[:space:]]*rmdir[[:space:]]+pasta-vazia[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Use rmdir pasta-vazia como pedido."
+    },
+    {
+      "id": "used-recursive-removal",
+      "label": "Você praticou uma remoção recursiva controlada",
+      "command": "grep -Eq '^[[:space:]]*rm[[:space:]]+-r[[:space:]]+rascunhos/?[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Remova rascunhos com rm -r rascunhos."
+    }
+  ],
+  "smokeCommands": [
+    "ls -R",
+    "rm temporarios/cache.tmp",
+    "rmdir pasta-vazia",
+    "rm -r rascunhos"
+  ]
+}

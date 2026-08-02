@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "listagens-detalhadas",
+  "curriculumId": "M01-L03",
+  "moduleId": "M01",
+  "level": "iniciante",
+  "order": 3,
+  "prerequisites": ["caminhos-linux"],
+  "eyebrow": "Fundamentos do terminal",
+  "title": "Veja além dos nomes",
+  "summary": "Combine opções do ls para revelar arquivos ocultos, detalhes e tamanhos legíveis.",
+  "duration": "6 min",
+  "objective": "Ler listagens simples e detalhadas e combinar opções curtas em um único comando.",
+  "concepts": [
+    "Opções alteram o comportamento de um comando e normalmente começam com hífen.",
+    "Arquivos cujo nome começa com ponto ficam ocultos em uma listagem simples.",
+    "Opções curtas como -l, -a e -h podem ser combinadas."
+  ],
+  "examples": [
+    {
+      "command": "ls",
+      "explanation": "Mostra apenas os nomes não ocultos."
+    },
+    {
+      "command": "ls -a",
+      "explanation": "Inclui arquivos ocultos na listagem."
+    },
+    {
+      "command": "ls -lh",
+      "explanation": "Mostra detalhes com tamanhos mais fáceis de ler."
+    },
+    {
+      "command": "ls -lah",
+      "explanation": "Combina listagem detalhada, ocultos e tamanhos legíveis."
+    }
+  ],
+  "taskIntro": "Investigue a pasta laboratório até encontrar o arquivo oculto e entender seus detalhes.",
+  "steps": [
+    "Execute uma listagem simples para comparar o que aparece.",
+    "Liste também os arquivos ocultos.",
+    "Mostre uma listagem detalhada com tamanhos legíveis.",
+    "Combine as três opções em ls -lah."
+  ],
+  "hints": [
+    "A opção -a vem de all e revela nomes iniciados por ponto.",
+    "A opção -l ativa o formato longo da listagem.",
+    "A opção -h transforma tamanhos em unidades legíveis.",
+    "Você pode escrever -l -a -h ou combinar as letras como -lah."
+  ],
+  "startingDirectory": "/home/aluno/laboratorio",
+  "setupCommand": "mkdir -p /home/aluno/laboratorio/dados && printf 'configuração interna\\n' > /home/aluno/laboratorio/.atalhos && printf 'relatório de exemplo\\n' > /home/aluno/laboratorio/relatorio.txt && dd if=/dev/zero of=/home/aluno/laboratorio/dados/amostra.bin bs=1024 count=12 status=none",
+  "checks": [
+    {
+      "id": "simple-list",
+      "label": "Você executou uma listagem simples",
+      "command": "grep -Eq '^[[:space:]]*ls[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Comece executando apenas ls para ver a listagem padrão."
+    },
+    {
+      "id": "hidden-list",
+      "label": "Você usou a opção -a para revelar arquivos ocultos",
+      "command": "grep -Eq '^[[:space:]]*ls[[:space:]]+-[[:alnum:]]*a[[:alnum:]]*[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Use ls -a ou combine a letra a com outras opções."
+    },
+    {
+      "id": "long-list",
+      "label": "Você usou a opção -l para ver detalhes",
+      "command": "grep -Eq '^[[:space:]]*ls[[:space:]]+-[[:alnum:]]*l[[:alnum:]]*[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Inclua a opção -l em uma das listagens."
+    },
+    {
+      "id": "human-list",
+      "label": "Você usou -h para exibir tamanhos legíveis",
+      "command": "grep -Eq '^[[:space:]]*ls[[:space:]]+-[[:alnum:]]*h[[:alnum:]]*[[:space:]]*$' /home/aluno/.lesson_history",
+      "failureMessage": "Inclua a opção -h junto com -l."
+    }
+  ],
+  "smokeCommands": [
+    "ls",
+    "ls -a",
+    "ls -lh",
+    "ls -lah"
+  ]
+}
