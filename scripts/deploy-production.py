@@ -160,17 +160,30 @@ def wait_for_health(timeout_seconds: int = 180) -> None:
     raise RuntimeError(f"Saúde pública não confirmou o deploy: {last_error}")
 
 
-def running_app_container(endpoint_id: int) -> str:
+def wait_for_release_container(endpoint_id: int, timeout_seconds: int = 180) -> str:
     filters = urllib.parse.quote(
         json.dumps({"label": ["com.docker.swarm.service.name=linux-tutor_app"]})
     )
-    containers = portainer_json(
-        f"/api/endpoints/{endpoint_id}/docker/containers/json?all=1&filters={filters}"
-    )
-    running = [container for container in containers if container.get("State") == "running"]
-    if len(running) != 1:
-        raise RuntimeError(f"Esperava um contêiner app em execução; encontrei {len(running)}")
-    return running[0]["Id"]
+    expected_image = f"linux-tutor-app:{IMAGE_TAG}"
+    deadline = time.monotonic() + timeout_seconds
+    last_status = "contêiner ainda não criado"
+    while time.monotonic() < deadline:
+        containers = portainer_json(
+            f"/api/endpoints/{endpoint_id}/docker/containers/json?all=1&filters={filters}"
+        )
+        matching = [container for container in containers if container.get("Image") == expected_image]
+        healthy = [
+            container
+            for container in matching
+            if container.get("State") == "running" and "(healthy)" in container.get("Status", "")
+        ]
+        if len(healthy) == 1:
+            print(f"Réplica {IMAGE_TAG} está saudável.", flush=True)
+            return healthy[0]["Id"]
+        if matching:
+            last_status = ", ".join(container.get("Status", "desconhecido") for container in matching)
+        time.sleep(3)
+    raise RuntimeError(f"A réplica {IMAGE_TAG} não ficou saudável: {last_status}")
 
 
 def demultiplex_docker_output(data: bytes) -> str:
@@ -240,8 +253,8 @@ def main() -> None:
         print(f"Atualizando a stack {STACK_NAME} para {IMAGE_TAG}...", flush=True)
         update_stack(stack_id, endpoint_id, production_content, environment)
         updated = True
+        container_id = wait_for_release_container(endpoint_id)
         wait_for_health()
-        container_id = running_app_container(endpoint_id)
         exec_in_container(endpoint_id, container_id, ["npm", "run", "lessons:validate"])
         exec_in_container(endpoint_id, container_id, ["npm", "run", "smoke"])
     except Exception:
