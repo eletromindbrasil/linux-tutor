@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "historico-produtividade",
+  "curriculumId": "M07-L05",
+  "moduleId": "M07",
+  "level": "iniciante",
+  "order": 35,
+  "prerequisites": ["aliases-funcoes"],
+  "eyebrow": "Produtividade no prompt",
+  "title": "Reutilize o histórico do shell",
+  "summary": "Liste, filtre e repita comandos sem redigitar sequências longas.",
+  "duration": "9 min",
+  "objective": "Usar history, fc e expansão !! e reconhecer a busca reversa como atalho interativo.",
+  "concepts": [
+    "history numera comandos anteriores e Ctrl+R procura interativamente de trás para frente.",
+    "!! repete o comando anterior; fc permite listar ou editar intervalos do histórico."
+  ],
+  "examples": [
+    {"command": "history 10", "explanation": "Mostra os dez comandos mais recentes."},
+    {"command": "history | grep chmod", "explanation": "Filtra comandos anteriores por texto."},
+    {"command": "!!", "explanation": "Expande e executa novamente o comando anterior."},
+    {"command": "fc -l -5", "explanation": "Lista as cinco entradas mais recentes pelo builtin fc."}
+  ],
+  "taskIntro": "Consulte, filtre e reutilize o histórico e salve um recorte para revisão.",
+  "steps": [
+    "Execute history 10.",
+    "Execute echo repetido e repita-o com !!.",
+    "Execute fc -l -5.",
+    "Grave history 20 em ultimos.txt e procure echo nesse arquivo."
+  ],
+  "hints": [
+    "history recebe a quantidade como argumento.",
+    "Digite dois pontos de exclamação para repetir a última linha.",
+    "fc é um builtin do Bash, assim como history.",
+    "Ctrl+R é útil no uso diário, mas o arquivo final é criado com history 20."
+  ],
+  "startingDirectory": "/home/aluno/historico",
+  "setupCommand": "mkdir -p /home/aluno/historico",
+  "checks": [
+    {"id": "history-listed", "label": "Você listou o histórico recente", "command": "grep -Eq '^[[:space:]]*history[[:space:]]+10[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute history 10."},
+    {"id": "command-repeated", "label": "Você repetiu o comando anterior", "command": "test \"$(grep -Ec '^[[:space:]]*echo[[:space:]]+repetido[[:space:]]*$' /home/aluno/.lesson_history)\" -ge 2", "failureMessage": "Execute echo repetido e depois !!."},
+    {"id": "fc-used", "label": "Você consultou entradas com fc", "command": "grep -Eq '^[[:space:]]*fc[[:space:]]+-l[[:space:]]+-5[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute fc -l -5."},
+    {"id": "history-saved", "label": "Um recorte do histórico foi salvo", "command": "test -s /home/aluno/historico/ultimos.txt && grep -q 'echo repetido' /home/aluno/historico/ultimos.txt", "failureMessage": "Grave history 20 em ultimos.txt."}
+  ],
+  "smokeCommands": ["history 10", "echo repetido", "!!", "fc -l -5", "history 20 > ultimos.txt", "grep echo ultimos.txt"]
+}

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "processos-pids",
+  "curriculumId": "M08-L01",
+  "moduleId": "M08",
+  "level": "iniciante",
+  "order": 36,
+  "prerequisites": ["historico-produtividade"],
+  "eyebrow": "Processos Linux",
+  "title": "Encontre processos e PIDs",
+  "summary": "Inicie um processo identificável e relacione PID, PPID, estado e linha de comando.",
+  "duration": "11 min",
+  "objective": "Usar ps e pgrep para localizar e interpretar um processo do próprio usuário.",
+  "concepts": [
+    "Cada processo possui um PID e normalmente registra o PPID do processo que o iniciou.",
+    "ps produz uma fotografia; pgrep pesquisa processos atuais por nome ou linha de comando."
+  ],
+  "examples": [
+    {"command": "ps -o pid,ppid,stat,cmd", "explanation": "Escolhe colunas úteis para uma fotografia de processos."},
+    {"command": "pgrep -af nome", "explanation": "Mostra PID e linha completa dos processos correspondentes."},
+    {"command": "echo $!", "explanation": "Depois de &, mostra o PID do último job iniciado em background."}
+  ],
+  "taskIntro": "Inicie um worker de laboratório, registre seu PID e encontre-o de duas formas.",
+  "steps": [
+    "Inicie bash -c 'exec -a tutor-worker sleep 60' em background.",
+    "Grave $! em worker.pid.",
+    "Inspecione o PID com ps -p e as colunas pid,ppid,stat,cmd.",
+    "Localize o mesmo processo com pgrep -af tutor-worker."
+  ],
+  "hints": [
+    "Acrescente & ao final do comando para recuperar o prompt.",
+    "$! contém o PID do último processo em background.",
+    "Use substituição $(cat worker.pid) no argumento de ps -p.",
+    "A opção -f de pgrep examina a linha de comando completa."
+  ],
+  "startingDirectory": "/home/aluno/processos",
+  "setupCommand": "mkdir -p /home/aluno/processos",
+  "checks": [
+    {"id": "pid-recorded", "label": "O PID do worker foi registrado", "command": "test -s /home/aluno/processos/worker.pid && test \"$(cat /home/aluno/processos/worker.pid)\" -eq \"$(cat /home/aluno/processos/worker.pid)\" 2>/dev/null", "failureMessage": "Grave $! em worker.pid logo após iniciar o processo."},
+    {"id": "worker-running", "label": "O worker registrado está em execução", "command": "kill -0 \"$(cat /home/aluno/processos/worker.pid)\" 2>/dev/null", "failureMessage": "O PID registrado não corresponde a um processo ativo."},
+    {"id": "ps-inspected", "label": "Você inspecionou PID, PPID, estado e comando", "command": "grep -Eq 'ps[[:space:]]+-p.*worker\\.pid.*-o[[:space:]]+pid,ppid,stat,cmd' /home/aluno/.lesson_history", "failureMessage": "Use ps -p \"$(cat worker.pid)\" -o pid,ppid,stat,cmd."},
+    {"id": "pgrep-used", "label": "Você localizou o worker com pgrep", "command": "grep -Eq 'pgrep[[:space:]]+-af[[:space:]]+tutor-worker' /home/aluno/.lesson_history", "failureMessage": "Execute pgrep -af tutor-worker."}
+  ],
+  "smokeCommands": ["bash -c 'exec -a tutor-worker sleep 60' &", "echo $! > worker.pid", "ps -p \"$(cat worker.pid)\" -o pid,ppid,stat,cmd", "pgrep -af tutor-worker"]
+}

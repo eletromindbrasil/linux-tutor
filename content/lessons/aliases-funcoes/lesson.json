@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "aliases-funcoes",
+  "curriculumId": "M07-L04",
+  "moduleId": "M07",
+  "level": "iniciante",
+  "order": 34,
+  "prerequisites": ["path-executaveis"],
+  "eyebrow": "Personalização do shell",
+  "title": "Crie aliases e funções simples",
+  "summary": "Use aliases para atalhos estáticos, funções para parâmetros e um arquivo para persistência.",
+  "duration": "12 min",
+  "objective": "Definir, usar e registrar um alias e uma função Bash simples.",
+  "concepts": [
+    "Alias substitui um nome por texto fixo; função aceita parâmetros e múltiplos comandos.",
+    "Definições do shell desaparecem ao encerrar a sessão, a menos que sejam carregadas por um arquivo de configuração."
+  ],
+  "examples": [
+    {"command": "alias ll='ls -lah'", "explanation": "Cria um atalho estático para uma listagem."},
+    {"command": "saudar(){ echo \"Ola $1\"; }", "explanation": "Define uma função que usa o primeiro argumento."},
+    {"command": "type ll saudar", "explanation": "Mostra como o shell classifica os dois nomes."}
+  ],
+  "taskIntro": "Crie um atalho e uma função, use ambos e registre as definições em .bash_aliases.",
+  "steps": [
+    "Defina alias ll='ls -lah' e execute ll.",
+    "Defina saudar(){ echo \"Ola $1\"; }.",
+    "Execute saudar Linux > saudacao.txt.",
+    "Grave as duas definições em /home/aluno/.bash_aliases e inspecione com type."
+  ],
+  "hints": [
+    "A definição do alias usa aspas para manter os espaços.",
+    "$1 representa o primeiro argumento da função.",
+    "A função pode ser escrita em uma única linha terminada por ;.",
+    ".bash_aliases deve conter definições, não apenas os resultados."
+  ],
+  "startingDirectory": "/home/aluno/personalizacao",
+  "setupCommand": "mkdir -p /home/aluno/personalizacao && touch /home/aluno/personalizacao/exemplo.txt",
+  "checks": [
+    {"id": "alias-used", "label": "Você definiu e usou o alias ll", "command": "grep -Eq \"alias[[:space:]]+ll=['\\\"]ls[[:space:]]+-lah['\\\"]\" /home/aluno/.lesson_history && grep -Eq '^[[:space:]]*ll[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Defina alias ll='ls -lah' e execute ll."},
+    {"id": "function-used", "label": "A função recebeu o argumento Linux", "command": "grep -Fxq 'Ola Linux' /home/aluno/personalizacao/saudacao.txt && grep -Eq 'saudar[[:space:]]+Linux' /home/aluno/.lesson_history", "failureMessage": "Defina saudar e execute saudar Linux > saudacao.txt."},
+    {"id": "definitions-saved", "label": "As definições foram registradas para reutilização", "command": "grep -Fq \"alias ll='ls -lah'\" /home/aluno/.bash_aliases && grep -Fq 'saudar(){ echo \"Ola $1\"; }' /home/aluno/.bash_aliases", "failureMessage": "Grave o alias e a função em /home/aluno/.bash_aliases."},
+    {"id": "types-inspected", "label": "Você investigou alias e função com type", "command": "grep -Eq '^[[:space:]]*type[[:space:]]+ll[[:space:]]+saudar[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute type ll saudar."}
+  ],
+  "smokeCommands": ["alias ll='ls -lah'", "ll", "saudar(){ echo \"Ola $1\"; }", "saudar Linux > saudacao.txt", "printf '%s\\n' \"alias ll='ls -lah'\" 'saudar(){ echo \"Ola $1\"; }' > /home/aluno/.bash_aliases", "type ll saudar"]
+}

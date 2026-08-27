@@ -3,7 +3,7 @@ FROM debian:bookworm-slim
 RUN sed -i '/\/usr\/share\/man\/\*/d' /etc/dpkg/dpkg.cfg.d/docker \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
-      diffutils file less locate man-db manpages nano vim \
+      diffutils file less locate man-db manpages nano procps sudo vim \
     && apt-get install -y --reinstall coreutils \
     && mandb --quiet \
     && rm -rf /var/lib/apt/lists/* \

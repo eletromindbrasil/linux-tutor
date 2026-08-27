@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "sinais-processos",
+  "curriculumId": "M08-L04",
+  "moduleId": "M08",
+  "level": "iniciante",
+  "order": 39,
+  "prerequisites": ["jobs-foreground-background"],
+  "eyebrow": "Encerramento responsável",
+  "title": "Envie sinais a processos",
+  "summary": "Use TERM como primeira opção, confirme o encerramento e reserve KILL para último recurso.",
+  "duration": "11 min",
+  "objective": "Encerrar processos próprios por PID e por padrão de comando usando kill e pkill.",
+  "concepts": [
+    "SIGTERM solicita encerramento e permite limpeza; SIGKILL não pode ser tratado e deve ser último recurso.",
+    "kill recebe PIDs, enquanto pkill seleciona processos por nome ou linha de comando."
+  ],
+  "examples": [
+    {"command": "kill -TERM 1234", "explanation": "Solicita encerramento gracioso do PID 1234."},
+    {"command": "pkill -TERM -f '^alvo-'", "explanation": "Envia TERM a processos cuja linha começa com o padrão."},
+    {"command": "kill -0 1234", "explanation": "Testa existência e permissão sem enviar um sinal destrutivo."
+    }
+  ],
+  "taskIntro": "Inicie dois alvos controlados e encerre um por PID e outro por padrão.",
+  "steps": [
+    "Inicie um sleep com nome alvo-term e grave seu PID.",
+    "Use kill -TERM no PID registrado e aguarde o encerramento.",
+    "Inicie outro sleep com nome alvo-pkill.",
+    "Use pkill -TERM -f '^alvo-pkill' e confirme que ambos acabaram."
+  ],
+  "hints": [
+    "Use exec -a para dar um nome visível ao sleep.",
+    "Leia o PID com $(cat term.pid).",
+    "wait pode retornar diferente de zero quando o processo termina por sinal; trate com || true.",
+    "pgrep -af ajuda a confirmar que o alvo não aparece mais."
+  ],
+  "startingDirectory": "/home/aluno/sinais",
+  "setupCommand": "mkdir -p /home/aluno/sinais",
+  "checks": [
+    {"id": "term-sent", "label": "Você enviou SIGTERM pelo PID", "command": "grep -Eq 'kill[[:space:]]+-TERM.*term\\.pid' /home/aluno/.lesson_history", "failureMessage": "Use kill -TERM \"$(cat term.pid)\"."},
+    {"id": "pkill-used", "label": "Você enviou SIGTERM por padrão", "command": "grep -Eq \"pkill[[:space:]]+-TERM[[:space:]]+-f[[:space:]]+['\\\"]?\\^alvo-pkill\" /home/aluno/.lesson_history", "failureMessage": "Use pkill -TERM -f '^alvo-pkill'."},
+    {"id": "term-stopped", "label": "O primeiro alvo foi encerrado", "command": "! kill -0 \"$(cat /home/aluno/sinais/term.pid)\" 2>/dev/null", "failureMessage": "O processo salvo em term.pid ainda está ativo."},
+    {"id": "all-targets-stopped", "label": "Nenhum alvo do exercício permanece", "command": "! pgrep -f '^alvo-(term|pkill)' >/dev/null", "failureMessage": "Ainda existe um processo alvo; envie TERM e confira novamente."}
+  ],
+  "smokeCommands": ["bash -c 'exec -a alvo-term sleep 60' &", "echo $! > term.pid", "kill -TERM \"$(cat term.pid)\"", "wait \"$(cat term.pid)\" || true", "bash -c 'exec -a alvo-pkill sleep 60' &", "pkill -TERM -f '^alvo-pkill'", "wait $! || true", "pgrep -af '^alvo-' || true"]
+}

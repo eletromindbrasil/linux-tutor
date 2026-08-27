@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "sudo-menor-privilegio",
+  "curriculumId": "M06-L06",
+  "moduleId": "M06",
+  "level": "iniciante",
+  "order": 30,
+  "prerequisites": ["umask-padroes"],
+  "eyebrow": "Menor privilégio",
+  "title": "Use sudo somente quando necessário",
+  "summary": "Reconheça uma operação comum que dispensa elevação e observe uma tentativa sudo bloqueada com segurança.",
+  "duration": "10 min",
+  "objective": "Consultar sudo sem prompt, interpretar a negação e concluir uma tarefa com os privilégios atuais.",
+  "concepts": [
+    "sudo solicita uma política explícita; ele não deve ser um prefixo automático para qualquer comando.",
+    "Menor privilégio significa usar apenas as permissões necessárias durante o menor tempo possível."
+  ],
+  "examples": [
+    {"command": "sudo -n -l", "explanation": "Consulta permissões sem abrir um prompt de senha; falha rapidamente neste laboratório."},
+    {"command": "id", "explanation": "Confirma que a identidade continua sendo o usuário aluno."},
+    {"command": "cp dados.txt copia.txt", "explanation": "Conclui uma operação no diretório próprio sem sudo."}
+  ],
+  "taskIntro": "Confirme os limites do laboratório e resolva uma cópia comum sem tentar elevar privilégios.",
+  "steps": [
+    "Execute id para confirmar sua identidade.",
+    "Execute sudo -n -l e observe a negação sem fornecer senha.",
+    "Capture a falha de sudo -n true em sudo-erro.txt e grave bloqueado em resultado.txt.",
+    "Copie dados.txt para copia.txt usando apenas cp."
+  ],
+  "hints": [
+    "A opção -n impede que sudo espere uma senha.",
+    "Uma falha esperada pode ser tratada com ||.",
+    "Use 2> para guardar a mensagem do sudo.",
+    "Você é dono do diretório e não precisa de sudo para copiar o arquivo."
+  ],
+  "startingDirectory": "/home/aluno/sudo-lab",
+  "setupCommand": "mkdir -p /home/aluno/sudo-lab && printf 'dados do aluno\\n' > /home/aluno/sudo-lab/dados.txt",
+  "checks": [
+    {"id": "identity-checked", "label": "Você confirmou a identidade atual", "command": "grep -Eq '^[[:space:]]*id[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute id antes de avaliar a necessidade de sudo."},
+    {"id": "sudo-inspected", "label": "Você consultou sudo sem prompt", "command": "grep -Eq 'sudo[[:space:]]+-n[[:space:]]+-l' /home/aluno/.lesson_history", "failureMessage": "Execute sudo -n -l e observe a resposta."},
+    {"id": "denial-handled", "label": "A negação foi capturada e tratada", "command": "test -s /home/aluno/sudo-lab/sudo-erro.txt && grep -Fxq bloqueado /home/aluno/sudo-lab/resultado.txt", "failureMessage": "Capture stderr de sudo -n true e trate a falha gravando bloqueado."},
+    {"id": "unprivileged-copy", "label": "A cópia foi concluída sem elevação", "command": "cmp -s /home/aluno/sudo-lab/dados.txt /home/aluno/sudo-lab/copia.txt && grep -Eq '^[[:space:]]*cp[[:space:]]+dados\\.txt[[:space:]]+copia\\.txt[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Use cp dados.txt copia.txt sem sudo."}
+  ],
+  "smokeCommands": ["id", "sudo -n -l || true", "sudo -n true 2> sudo-erro.txt || echo bloqueado > resultado.txt", "cp dados.txt copia.txt"]
+}

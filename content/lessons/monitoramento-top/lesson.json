@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "monitoramento-top",
+  "curriculumId": "M08-L02",
+  "moduleId": "M08",
+  "level": "iniciante",
+  "order": 37,
+  "prerequisites": ["processos-pids"],
+  "eyebrow": "Monitoramento de processos",
+  "title": "Observe o sistema com top",
+  "summary": "Leia carga, CPU, memória e processos com top e compare com relatórios não interativos.",
+  "duration": "10 min",
+  "objective": "Usar top, uptime, free e ps ordenado para obter uma visão rápida do laboratório.",
+  "concepts": [
+    "top atualiza uma visão interativa; no modo batch ele produz uma fotografia apropriada para arquivos.",
+    "Load average, uso de CPU e memória respondem perguntas diferentes e devem ser correlacionados."
+  ],
+  "examples": [
+    {"command": "top", "explanation": "Abre a visão interativa; pressione q para sair."},
+    {"command": "top -b -n 1", "explanation": "Produz uma única atualização em modo batch."},
+    {"command": "ps aux --sort=-%cpu | head", "explanation": "Lista os processos com maior uso de CPU primeiro."}
+  ],
+  "taskIntro": "Colete uma fotografia de monitoramento e consulte carga, memória e processos mais ativos.",
+  "steps": [
+    "Abra top e pressione q para sair.",
+    "Grave top -b -n 1 em top.txt.",
+    "Execute uptime e free -h.",
+    "Execute ps aux --sort=-%cpu | head."
+  ],
+  "hints": [
+    "A tecla q fecha top.",
+    "-b evita controle interativo e -n 1 limita a uma amostra.",
+    "uptime inclui load average.",
+    "O sinal - antes de %cpu indica ordem decrescente."
+  ],
+  "startingDirectory": "/home/aluno/monitoramento",
+  "setupCommand": "mkdir -p /home/aluno/monitoramento",
+  "checks": [
+    {"id": "top-used", "label": "Você praticou top", "command": "grep -Eq '^[[:space:]]*top([[:space:]]*$|[[:space:]]+-b[[:space:]]+-n[[:space:]]+1)' /home/aluno/.lesson_history", "failureMessage": "Abra top e saia com q."},
+    {"id": "snapshot-created", "label": "A fotografia batch foi criada", "command": "test -s /home/aluno/monitoramento/top.txt && grep -q 'load average' /home/aluno/monitoramento/top.txt && grep -q 'PID' /home/aluno/monitoramento/top.txt", "failureMessage": "Grave top -b -n 1 em top.txt."},
+    {"id": "resources-inspected", "label": "Você consultou carga e memória", "command": "grep -Eq '^[[:space:]]*uptime[[:space:]]*$' /home/aluno/.lesson_history && grep -Eq '^[[:space:]]*free[[:space:]]+-h[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute uptime e free -h."},
+    {"id": "cpu-sorted", "label": "Você ordenou processos por CPU", "command": "grep -Eq 'ps[[:space:]]+aux[[:space:]]+--sort=-%cpu[[:space:]]*[|][[:space:]]*head' /home/aluno/.lesson_history", "failureMessage": "Execute ps aux --sort=-%cpu | head."}
+  ],
+  "smokeCommands": ["top -b -n 1 > top.txt", "uptime", "free -h", "ps aux --sort=-%cpu | head"]
+}

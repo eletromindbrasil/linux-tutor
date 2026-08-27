@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "variaveis-ambiente",
+  "curriculumId": "M07-L01",
+  "moduleId": "M07",
+  "level": "iniciante",
+  "order": 31,
+  "prerequisites": ["sudo-menor-privilegio"],
+  "eyebrow": "Ambiente do shell",
+  "title": "Expanda variáveis com segurança",
+  "summary": "Crie uma variável, exporte-a para processos filhos e use sua expansão em comandos.",
+  "duration": "9 min",
+  "objective": "Distinguir variável do shell de variável exportada e gerar um arquivo a partir de seu valor.",
+  "concepts": [
+    "NOME=valor cria uma variável no shell atual; export a inclui no ambiente herdado por processos filhos.",
+    "$NOME pede ao shell que substitua o nome pelo valor antes de executar o comando."
+  ],
+  "examples": [
+    {"command": "CURSO=Linux", "explanation": "Define uma variável no shell atual."},
+    {"command": "export CURSO", "explanation": "Disponibiliza CURSO para comandos iniciados depois."},
+    {"command": "printf '%s\\n' \"$CURSO\"", "explanation": "Expande o valor preservando espaços."}
+  ],
+  "taskIntro": "Configure o nome do curso no ambiente e use-o para produzir um pequeno registro.",
+  "steps": [
+    "Defina CURSO=Linux.",
+    "Exporte CURSO.",
+    "Mostre o valor com echo \"$CURSO\".",
+    "Grave curso=Linux em ambiente.txt usando a variável e confirme com env."
+  ],
+  "hints": [
+    "Não use espaços ao redor de = na atribuição.",
+    "Execute export CURSO em uma segunda etapa.",
+    "Use aspas duplas ao expandir a variável.",
+    "env | grep '^CURSO=' confirma que processos filhos recebem o valor."
+  ],
+  "startingDirectory": "/home/aluno/ambiente",
+  "setupCommand": "mkdir -p /home/aluno/ambiente",
+  "checks": [
+    {"id": "variable-defined", "label": "Você definiu a variável do curso", "command": "grep -Eq '^[[:space:]]*CURSO=Linux[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute CURSO=Linux sem espaços ao redor de =."},
+    {"id": "variable-exported", "label": "Você exportou a variável", "command": "grep -Eq '^[[:space:]]*export[[:space:]]+CURSO[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute export CURSO."},
+    {"id": "environment-inspected", "label": "Você confirmou o valor no ambiente", "command": "grep -Eq \"env[[:space:]]*[|][[:space:]]*grep[[:space:]]+['\\\"]?\\^CURSO=\" /home/aluno/.lesson_history", "failureMessage": "Execute env | grep '^CURSO='."},
+    {"id": "environment-file", "label": "O registro usa o valor expandido", "command": "grep -Fxq 'curso=Linux' /home/aluno/ambiente/ambiente.txt", "failureMessage": "Grave curso=Linux em ambiente.txt usando $CURSO."}
+  ],
+  "smokeCommands": ["CURSO=Linux", "export CURSO", "echo \"$CURSO\"", "env | grep '^CURSO='", "printf 'curso=%s\\n' \"$CURSO\" > ambiente.txt"]
+}

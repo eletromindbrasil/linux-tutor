@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "jobs-foreground-background",
+  "curriculumId": "M08-L03",
+  "moduleId": "M08",
+  "level": "iniciante",
+  "order": 38,
+  "prerequisites": ["monitoramento-top"],
+  "eyebrow": "Controle de jobs",
+  "title": "Alterne entre foreground e background",
+  "summary": "Suspenda, retome e traga jobs de volta ao terminal usando recursos do shell interativo.",
+  "duration": "12 min",
+  "objective": "Usar &, jobs, bg e fg e diferenciar job ID de PID.",
+  "concepts": [
+    "Um job é a visão do shell sobre uma linha de execução; seu identificador %1 não é necessariamente um PID.",
+    "Ctrl+Z suspende o job em foreground, bg o retoma ao fundo e fg o traz de volta."
+  ],
+  "examples": [
+    {"command": "sleep 60 &", "explanation": "Inicia um job em background e devolve o prompt."},
+    {"command": "jobs", "explanation": "Lista jobs conhecidos pelo shell atual."},
+    {"command": "bg %1", "explanation": "Retoma o job 1 em background."},
+    {"command": "fg %1", "explanation": "Traz o job 1 para foreground."
+    }
+  ],
+  "taskIntro": "Controle um sleep curto como job e acompanhe suas mudanças de estado.",
+  "steps": [
+    "Inicie sleep 30 em foreground e pressione Ctrl+Z.",
+    "Execute jobs para confirmar o estado parado.",
+    "Execute bg %1 e consulte jobs novamente.",
+    "Execute fg %1 e finalize com Ctrl+C."
+  ],
+  "hints": [
+    "Ctrl+Z suspende, mas não encerra o processo.",
+    "jobs funciona apenas no shell que iniciou o job.",
+    "Use o identificador mostrado, normalmente %1.",
+    "Ctrl+C envia uma interrupção ao job em foreground."
+  ],
+  "startingDirectory": "/home/aluno/jobs-lab",
+  "setupCommand": "mkdir -p /home/aluno/jobs-lab",
+  "checks": [
+    {"id": "jobs-listed", "label": "Você consultou a tabela de jobs", "command": "grep -Eq '^[[:space:]]*jobs[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute jobs para ver o estado do job."},
+    {"id": "background-used", "label": "Você retomou um job em background", "command": "grep -Eq '^[[:space:]]*bg[[:space:]]+%1[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute bg %1 depois de suspender o job."},
+    {"id": "foreground-used", "label": "Você trouxe um job para foreground", "command": "grep -Eq '^[[:space:]]*fg[[:space:]]+%1[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute fg %1."},
+    {"id": "job-started", "label": "Você iniciou um processo controlado pelo shell", "command": "grep -Eq 'sleep[[:space:]]+[0-9]+[[:space:]]*&' /home/aluno/.lesson_history", "failureMessage": "Inicie um sleep para praticar o controle de jobs."}
+  ],
+  "smokeCommands": ["sleep 2 &", "kill -STOP $!", "jobs", "bg %1", "jobs", "fg %1"]
+}

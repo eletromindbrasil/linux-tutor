@@ -98,7 +98,7 @@ O aprendizado acontece por prática:
 |---|---|---|---|
 | SYS-001 | Aplicação React/Vite servida localmente | done | build Docker e health check |
 | SYS-002 | Backend Node/Express com autenticação | done | login, sessão, logout e troca de senha |
-| SYS-003 | Terminal web com xterm.js e WebSocket | done | smoke test das 29 lições |
+| SYS-003 | Terminal web com xterm.js e WebSocket | done | smoke test das 40 lições |
 | SYS-004 | Terminal conectado a Debian real | done | comandos executados no sandbox |
 | SYS-005 | Contêiner descartável por sessão de lição | done | criação e remoção pela API |
 | SYS-006 | Sandbox sem rede e com limites de CPU, memória, processos e capabilities | done | configuração Dockerode |
@@ -163,6 +163,17 @@ por revisão didática antes de ser considerado definitivo.
 | M06-L03 | `alterar-permissoes` | Altere permissões com `chmod` | done-prototype |
 | M06-L04 | `dono-e-grupo` | Ajuste dono e grupo com segurança | done-prototype |
 | M06-L05 | `umask-padroes` | Defina padrões seguros com `umask` | done-prototype |
+| M06-L06 | `sudo-menor-privilegio` | Use sudo somente quando necessário | done-prototype |
+| M07-L01 | `variaveis-ambiente` | Expanda variáveis com segurança | done-prototype |
+| M07-L02 | `aspas-globbing` | Controle aspas, escaping e globbing | done-prototype |
+| M07-L03 | `path-executaveis` | Entenda a prioridade do PATH | done-prototype |
+| M07-L04 | `aliases-funcoes` | Crie aliases e funções simples | done-prototype |
+| M07-L05 | `historico-produtividade` | Reutilize o histórico do shell | done-prototype |
+| M08-L01 | `processos-pids` | Encontre processos e PIDs | done-prototype |
+| M08-L02 | `monitoramento-top` | Observe o sistema com top | done-prototype |
+| M08-L03 | `jobs-foreground-background` | Alterne entre foreground e background | done-prototype |
+| M08-L04 | `sinais-processos` | Envie sinais a processos | done-prototype |
+| M08-L05 | `nohup-sessoes` | Proteja uma tarefa com nohup | done-prototype |
 
 ### 4.3 Estrutura atual relevante
 
@@ -202,7 +213,7 @@ LinuxTutor/
 - O app monta o socket do Docker; a publicação deve permanecer em loopback atrás de proxy HTTPS.
 - Não há recuperação de senha por e-mail; uma redefinição administrativa ainda exige acesso ao banco.
 - O contêiner padrão não serve para tarefas reais de boot, kernel, systemd, discos ou root amplo.
-- A qualidade pedagógica final das 29 aulas ainda não foi formalmente revisada.
+- A qualidade pedagógica final das 40 aulas ainda não foi formalmente revisada.
 
 ## 5. Arquitetura alvo
 
@@ -322,7 +333,7 @@ Status: **concluída**.
 Status: **em andamento**.
 
 - ENG-001, ENG-002 e ENG-004 concluídos.
-- Vinte e nove lições usam arquivos individuais com schema v1.
+- Quarenta lições usam arquivos individuais com schema v1.
 - Catálogo e soluções de referência são validados por comandos próprios.
 - Regras de autoria estão documentadas em `content/README.md`.
 - ENG-003 permanece parcial: checks ainda são comandos shell, não tipos declarativos.
@@ -407,17 +418,17 @@ Status: **em andamento**.
 | M06-L03 | Alterar permissões com `chmod` simbólico e octal | done-prototype |
 | M06-L04 | Dono e grupo com `chown` e `chgrp` | done-prototype |
 | M06-L05 | `umask` e permissões padrão | done-prototype |
-| M06-L06 | Princípios de `sudo` e menor privilégio | planned |
-| M07-L01 | Variáveis de ambiente e expansão com `$` | planned |
-| M07-L02 | Aspas simples, duplas, escaping e globbing | planned |
-| M07-L03 | `PATH`, localização e prioridade de executáveis | planned |
-| M07-L04 | Aliases, funções simples e configuração do shell | planned |
-| M07-L05 | Histórico, busca reversa e produtividade no prompt | planned |
-| M08-L01 | Processos e PIDs com `ps` e `pgrep` | planned |
-| M08-L02 | Monitoramento interativo com `top` e alternativas | planned |
-| M08-L03 | Foreground, background, `jobs`, `fg` e `bg` | planned |
-| M08-L04 | Sinais, `kill`, `pkill` e encerramento responsável | planned |
-| M08-L05 | Processos persistentes com `nohup` e noções de sessão | planned |
+| M06-L06 | Princípios de `sudo` e menor privilégio | done-prototype |
+| M07-L01 | Variáveis de ambiente e expansão com `$` | done-prototype |
+| M07-L02 | Aspas simples, duplas, escaping e globbing | done-prototype |
+| M07-L03 | `PATH`, localização e prioridade de executáveis | done-prototype |
+| M07-L04 | Aliases, funções simples e configuração do shell | done-prototype |
+| M07-L05 | Histórico, busca reversa e produtividade no prompt | done-prototype |
+| M08-L01 | Processos e PIDs com `ps` e `pgrep` | done-prototype |
+| M08-L02 | Monitoramento interativo com `top` e alternativas | done-prototype |
+| M08-L03 | Foreground, background, `jobs`, `fg` e `bg` | done-prototype |
+| M08-L04 | Sinais, `kill`, `pkill` e encerramento responsável | done-prototype |
+| M08-L05 | Processos persistentes com `nohup` e noções de sessão | done-prototype |
 
 ### Nível intermediário
 
@@ -520,9 +531,9 @@ Na próxima sequência, priorizar:
 
 1. Concluir ENG-003 com verificadores declarativos para os tipos já necessários.
 2. M00-L01 a M00-L03 — onboarding e segurança.
-3. M06-L06 — princípios de `sudo` e menor privilégio em cenário não privilegiado.
-4. M07 e M08 — ambiente do shell, produtividade e processos.
-5. Validar a trilha iniciante inteira antes de ampliar o volume intermediário.
+3. Validar didaticamente a trilha iniciante inteira antes de ampliar o volume intermediário.
+4. M09 — compactação, ZIP, checksums e sincronização com `rsync`.
+5. M10 — conceitos de pacotes e exercícios compatíveis com o laboratório não privilegiado.
 
 Não produzir dezenas de conteúdos antes de o schema, o validador e o test runner de lições
 estarem estáveis.
@@ -590,3 +601,4 @@ O serviço `app` deve aparecer como `healthy`.
 | 2026-08-27 | Reativado e reforçado o terminal com origem compatível com proxy, ownership por usuário, reconexão e limpeza por instância. |
 | 2026-08-27 | Automatizado deploy da stack original em `linux.eletrovps.com` via GitHub Actions e Portainer. |
 | 2026-08-27 | Implantadas 20 novas lições, concluindo M03, M04, M05 e M06 até permissões padrão. |
+| 2026-08-27 | Concluídos M06, M07 e M08 com 11 lições sobre menor privilégio, shell e processos. |

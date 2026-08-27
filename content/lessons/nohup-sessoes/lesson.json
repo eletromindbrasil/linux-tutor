@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "nohup-sessoes",
+  "curriculumId": "M08-L05",
+  "moduleId": "M08",
+  "level": "iniciante",
+  "order": 40,
+  "prerequisites": ["sinais-processos"],
+  "eyebrow": "Processos e sessão",
+  "title": "Proteja uma tarefa com nohup",
+  "summary": "Desconecte uma tarefa da entrada do terminal e direcione suas saídas para acompanhamento posterior.",
+  "duration": "11 min",
+  "objective": "Iniciar uma tarefa com nohup, registrar PID e saídas e reconhecer seus limites.",
+  "concepts": [
+    "nohup ignora SIGHUP e troca a entrada padrão, mas não cria supervisão, reinício automático ou logs rotativos.",
+    "Uma tarefa durável precisa de saídas redirecionadas; serviços reais normalmente usam um supervisor."
+  ],
+  "examples": [
+    {"command": "nohup comando > tarefa.log 2>&1 &", "explanation": "Ignora HUP, registra as duas saídas e devolve o prompt."},
+    {"command": "echo $! > tarefa.pid", "explanation": "Guarda o PID para observação ou encerramento posterior."},
+    {"command": "ps -p $(cat tarefa.pid)", "explanation": "Consulta a tarefa pelo PID registrado."
+    }
+  ],
+  "taskIntro": "Inicie uma tarefa curta com nohup e comprove o resultado e o registro de saída.",
+  "steps": [
+    "Execute com nohup um shell que espera dois segundos e grava concluido em resultado.txt.",
+    "Redirecione stdout e stderr para nohup.out e coloque a tarefa em background.",
+    "Grave $! em nohup.pid e consulte jobs.",
+    "Aguarde três segundos e leia resultado.txt e nohup.out."
+  ],
+  "hints": [
+    "Use sh -c para agrupar sleep e echo como uma tarefa.",
+    "Escreva > nohup.out 2>&1 antes de &.",
+    "Registre $! imediatamente após iniciar a tarefa.",
+    "nohup não substitui systemd ou outro supervisor para serviços reais."
+  ],
+  "startingDirectory": "/home/aluno/nohup-lab",
+  "setupCommand": "mkdir -p /home/aluno/nohup-lab",
+  "checks": [
+    {"id": "nohup-used", "label": "Você iniciou a tarefa com nohup e redirecionamentos", "command": "grep -Eq 'nohup[[:space:]]+sh[[:space:]]+-c.*>[[:space:]]*nohup\\.out[[:space:]]+2>&1[[:space:]]*&' /home/aluno/.lesson_history", "failureMessage": "Use nohup sh -c '...' > nohup.out 2>&1 &."},
+    {"id": "pid-saved", "label": "O PID da tarefa foi registrado", "command": "test -s /home/aluno/nohup-lab/nohup.pid && grep -Eq '^[0-9]+$' /home/aluno/nohup-lab/nohup.pid", "failureMessage": "Grave $! em nohup.pid imediatamente após iniciar a tarefa."},
+    {"id": "task-completed", "label": "A tarefa persistente concluiu seu trabalho", "command": "grep -Fxq concluido /home/aluno/nohup-lab/resultado.txt", "failureMessage": "Aguarde a tarefa e confirme resultado.txt."},
+    {"id": "job-observed", "label": "Você observou o job no shell", "command": "grep -Eq '^[[:space:]]*jobs[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute jobs depois de iniciar a tarefa."
+    }
+  ],
+  "smokeCommands": ["nohup sh -c 'sleep 2; echo concluido > resultado.txt' > nohup.out 2>&1 &", "echo $! > nohup.pid", "jobs", "sleep 3", "cat resultado.txt", "cat nohup.out"]
+}

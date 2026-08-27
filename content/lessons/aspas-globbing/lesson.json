@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "aspas-globbing",
+  "curriculumId": "M07-L02",
+  "moduleId": "M07",
+  "level": "iniciante",
+  "order": 32,
+  "prerequisites": ["variaveis-ambiente"],
+  "eyebrow": "Interpretação do shell",
+  "title": "Controle aspas, escaping e globbing",
+  "summary": "Preveja quando o shell expande variáveis, curingas e espaços antes de chamar um comando.",
+  "duration": "12 min",
+  "objective": "Comparar aspas simples e duplas, expansão de * e escaping de espaços.",
+  "concepts": [
+    "Aspas simples preservam tudo literalmente; aspas duplas permitem expansão de $variáveis.",
+    "Curingas sem aspas são expandidos pelo shell e a barra invertida protege o próximo caractere."
+  ],
+  "examples": [
+    {"command": "echo *.txt", "explanation": "O shell substitui o curinga pelos nomes correspondentes."},
+    {"command": "echo '*.txt'", "explanation": "Aspas simples preservam o asterisco literal."},
+    {"command": "touch relatorio\\ final.txt", "explanation": "A barra protege o espaço para formar um único nome."}
+  ],
+  "taskIntro": "Gere arquivos que mostrem quatro comportamentos de interpretação do shell.",
+  "steps": [
+    "Defina NOME=Linux.",
+    "Grave a expansão ordenada de *.txt em expandidos.txt.",
+    "Grave o texto literal *.txt em literal.txt.",
+    "Compare \"Ola $NOME\" com 'Ola $NOME' e crie relatorio final.txt usando escaping."
+  ],
+  "hints": [
+    "Sem aspas, *.txt vira uma lista de nomes.",
+    "Use aspas simples para manter o asterisco.",
+    "Aspas duplas expandem NOME; simples preservam $NOME.",
+    "Escreva relatorio\\ final.txt para proteger o espaço."
+  ],
+  "startingDirectory": "/home/aluno/aspas",
+  "setupCommand": "mkdir -p /home/aluno/aspas && touch /home/aluno/aspas/um.txt /home/aluno/aspas/dois.txt /home/aluno/aspas/notas.md",
+  "checks": [
+    {"id": "glob-expanded", "label": "O curinga foi expandido para dois nomes", "command": "printf 'dois.txt\\num.txt\\n' | cmp -s - /home/aluno/aspas/expandidos.txt", "failureMessage": "Expanda *.txt, transforme os espaços em linhas e ordene em expandidos.txt."},
+    {"id": "glob-literal", "label": "O curinga literal foi preservado", "command": "grep -Fxq '*.txt' /home/aluno/aspas/literal.txt", "failureMessage": "Use aspas simples para gravar *.txt literalmente."},
+    {"id": "quote-difference", "label": "Aspas duplas e simples produziram resultados diferentes", "command": "grep -Fxq 'Ola Linux' /home/aluno/aspas/dupla.txt && grep -Fxq 'Ola $NOME' /home/aluno/aspas/simples.txt", "failureMessage": "Confira a expansão com aspas duplas e a preservação com aspas simples."},
+    {"id": "escaped-space", "label": "O arquivo com espaço foi criado", "command": "test -f '/home/aluno/aspas/relatorio final.txt' && grep -Fq 'touch relatorio\\ final.txt' /home/aluno/.lesson_history", "failureMessage": "Use touch relatorio\\ final.txt."}
+  ],
+  "smokeCommands": ["NOME=Linux", "echo *.txt | tr ' ' '\\n' | sort > expandidos.txt", "echo '*.txt' > literal.txt", "echo \"Ola $NOME\" > dupla.txt", "echo 'Ola $NOME' > simples.txt", "touch relatorio\\ final.txt"]
+}

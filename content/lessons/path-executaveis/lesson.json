@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "path-executaveis",
+  "curriculumId": "M07-L03",
+  "moduleId": "M07",
+  "level": "iniciante",
+  "order": 33,
+  "prerequisites": ["aspas-globbing"],
+  "eyebrow": "Resolução de comandos",
+  "title": "Entenda a prioridade do PATH",
+  "summary": "Descubra de onde um comando vem e adicione um diretório pessoal à busca do shell.",
+  "duration": "11 min",
+  "objective": "Inspecionar PATH, localizar executáveis e executar um script pelo nome.",
+  "concepts": [
+    "PATH é uma lista de diretórios pesquisados da esquerda para a direita quando não há / no comando.",
+    "command -v e type ajudam a detectar executáveis, aliases, funções e builtins."
+  ],
+  "examples": [
+    {"command": "command -v ls", "explanation": "Mostra como o shell resolverá o nome ls."},
+    {"command": "export PATH=\"$PWD/bin:$PATH\"", "explanation": "Prioriza o diretório bin atual sem perder o PATH existente."},
+    {"command": "type -a comando", "explanation": "Lista todas as resoluções conhecidas para o nome."}
+  ],
+  "taskIntro": "Coloque o script saudacao no PATH, investigue sua origem e execute-o sem usar caminho.",
+  "steps": [
+    "Execute ./bin/saudacao para confirmar o script.",
+    "Acrescente $PWD/bin ao início de PATH.",
+    "Grave command -v saudacao em localizado.txt.",
+    "Execute type -a saudacao e depois saudacao > executado.txt."
+  ],
+  "hints": [
+    "O script já está executável.",
+    "Preserve o valor anterior escrevendo :$PATH ao final.",
+    "command -v deve mostrar /home/aluno/path-lab/bin/saudacao.",
+    "Depois do export, apenas saudacao deve funcionar."
+  ],
+  "startingDirectory": "/home/aluno/path-lab",
+  "setupCommand": "mkdir -p /home/aluno/path-lab/bin && printf '#!/bin/sh\\necho Ola pelo PATH\\n' > /home/aluno/path-lab/bin/saudacao && chmod +x /home/aluno/path-lab/bin/saudacao",
+  "checks": [
+    {"id": "direct-execution", "label": "Você testou o script pelo caminho", "command": "grep -Eq '^[[:space:]]*\\./bin/saudacao[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute ./bin/saudacao primeiro."},
+    {"id": "path-extended", "label": "Você preservou e ampliou PATH", "command": "grep -Eq 'export[[:space:]]+PATH=.*bin.*[$]PATH' /home/aluno/.lesson_history", "failureMessage": "Use export PATH=\"$PWD/bin:$PATH\"."},
+    {"id": "command-located", "label": "O caminho resolvido foi registrado", "command": "grep -Fxq '/home/aluno/path-lab/bin/saudacao' /home/aluno/path-lab/localizado.txt", "failureMessage": "Grave command -v saudacao em localizado.txt."},
+    {"id": "path-execution", "label": "O script foi executado somente pelo nome", "command": "grep -Fxq 'Ola pelo PATH' /home/aluno/path-lab/executado.txt && grep -Eq '^[[:space:]]*saudacao[[:space:]]*>[[:space:]]*executado\\.txt' /home/aluno/.lesson_history", "failureMessage": "Execute saudacao > executado.txt depois de atualizar PATH."}
+  ],
+  "smokeCommands": ["./bin/saudacao", "export PATH=\"$PWD/bin:$PATH\"", "command -v saudacao > localizado.txt", "type -a saudacao", "saudacao > executado.txt"]
+}
