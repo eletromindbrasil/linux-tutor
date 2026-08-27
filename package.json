@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.server.json && vite build",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "test": "tsc -p tsconfig.server.json && node --test dist-server/server/*.test.js",
     "dev": "vite --host 127.0.0.1",
     "lessons:validate": "node dist-server/server/validateLessons.js",
     "smoke": "node dist-server/server/smoke.js",
@@ -16,6 +17,7 @@
     "@xterm/xterm": "^5.5.0",
     "dockerode": "^5.0.1",
     "express": "^5.1.0",
+    "pg": "^8.23.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "ws": "^8.18.3"
@@ -24,6 +26,7 @@
     "@types/dockerode": "^3.3.44",
     "@types/express": "^5.0.5",
     "@types/node": "^24.10.1",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/ws": "^8.18.1",

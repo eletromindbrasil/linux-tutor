@@ -14,21 +14,80 @@ import {
 import { TerminalPanel } from "./components/TerminalPanel";
 import type { Lesson, VerificationResult } from "./types";
 
-const progressKey = "linux-tutor-progress-v1";
+interface User {
+  id: string;
+  email: string;
+  mustChangePassword: boolean;
+}
 
-function loadProgress(): string[] {
-  try {
-    const stored = localStorage.getItem(progressKey);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
+interface SessionPayload {
+  user: User;
+  completedLessonIds: string[];
 }
 
 export function App() {
+  const [session, setSession] = useState<SessionPayload | null>(null);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [temporaryPassword, setTemporaryPassword] = useState("");
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then(async (response) => response.ok ? response.json() : null)
+      .then((payload: SessionPayload | null) => setSession(payload))
+      .catch(() => setSession(null))
+      .finally(() => setCheckingSession(false));
+  }, []);
+
+  if (checkingSession) {
+    return <BootScreen label="Verificando acesso" />;
+  }
+
+  if (!session) {
+    return (
+      <LoginScreen
+        onAuthenticated={(payload, password) => {
+          setTemporaryPassword(password);
+          setSession(payload);
+        }}
+      />
+    );
+  }
+
+  if (session.user.mustChangePassword) {
+    return (
+      <ChangePasswordScreen
+        email={session.user.email}
+        initialCurrentPassword={temporaryPassword}
+        onChanged={(payload) => {
+          setTemporaryPassword("");
+          setSession(payload);
+        }}
+        onLogout={() => void logout(() => setSession(null))}
+      />
+    );
+  }
+
+  return (
+    <LearningApp
+      user={session.user}
+      initialCompletedLessons={session.completedLessonIds}
+      onLogout={() => void logout(() => setSession(null))}
+    />
+  );
+}
+
+function LearningApp({
+  user,
+  initialCompletedLessons,
+  onLogout
+}: {
+  user: User;
+  initialCompletedLessons: string[];
+  onLogout: () => void;
+}) {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
-  const [completedLessons, setCompletedLessons] = useState<string[]>(loadProgress);
+  const [completedLessons, setCompletedLessons] = useState<string[]>(initialCompletedLessons);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(true);
   const [environmentError, setEnvironmentError] = useState<string | null>(null);
@@ -128,7 +187,6 @@ export function App() {
       if (data.passed && activeLessonId && !completedLessons.includes(activeLessonId)) {
         const nextCompleted = [...completedLessons, activeLessonId];
         setCompletedLessons(nextCompleted);
-        localStorage.setItem(progressKey, JSON.stringify(nextCompleted));
       }
     } catch (error) {
       setEnvironmentError(error instanceof Error ? error.message : "Falha inesperada.");
@@ -213,6 +271,10 @@ export function App() {
             <span>Seus comandos rodam em um contêiner isolado.</span>
           </div>
         </div>
+        <button className="logout-button" onClick={onLogout} title={`Sair de ${user.email}`}>
+          <span>Sair</span>
+          <small>{user.email}</small>
+        </button>
       </aside>
 
       {mobileMenuOpen ? <button className="sidebar-scrim" onClick={() => setMobileMenuOpen(false)} aria-label="Fechar menu" /> : null}
@@ -338,4 +400,128 @@ export function App() {
       </main>
     </div>
   );
+}
+
+function BootScreen({ label }: { label: string }) {
+  return (
+    <main className="boot-screen">
+      <span className="brand-mark"><TerminalIcon /></span>
+      <span className="loader" />
+      <strong>{label}</strong>
+    </main>
+  );
+}
+
+function LoginScreen({
+  onAuthenticated
+}: {
+  onAuthenticated: (payload: SessionPayload, password: string) => void;
+}) {
+  const [email, setEmail] = useState("eletromind.brasil@gmail.com");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "Não foi possível entrar.");
+      onAuthenticated(payload, password);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Falha inesperada.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <AuthLayout title="Entre no Linux Tutor" subtitle="Seu progresso e seus ambientes ficam protegidos pela sua conta.">
+      <form className="auth-form" onSubmit={(event) => void submit(event)}>
+        <label>E-mail<input type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
+        <label>Senha<input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>
+        {error ? <p className="auth-error" role="alert">{error}</p> : null}
+        <button className="primary-button" disabled={submitting}>{submitting ? "Entrando..." : "Entrar"}</button>
+      </form>
+    </AuthLayout>
+  );
+}
+
+function ChangePasswordScreen({
+  email,
+  initialCurrentPassword,
+  onChanged,
+  onLogout
+}: {
+  email: string;
+  initialCurrentPassword: string;
+  onChanged: (payload: SessionPayload) => void;
+  onLogout: () => void;
+}) {
+  const [currentPassword, setCurrentPassword] = useState(initialCurrentPassword);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    if (newPassword !== confirmation) {
+      setError("A confirmação não corresponde à nova senha.");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "Não foi possível alterar a senha.");
+      onChanged(payload);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Falha inesperada.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <AuthLayout title="Crie sua senha oficial" subtitle={`Primeiro acesso de ${email}. A senha temporária precisa ser substituída.`}>
+      <form className="auth-form" onSubmit={(event) => void submit(event)}>
+        <label>Senha temporária<input type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} required /></label>
+        <label>Nova senha <small>Mínimo de 10 caracteres</small><input type="password" autoComplete="new-password" minLength={10} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} required /></label>
+        <label>Confirme a nova senha<input type="password" autoComplete="new-password" minLength={10} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} required /></label>
+        {error ? <p className="auth-error" role="alert">{error}</p> : null}
+        <button className="primary-button" disabled={submitting}>{submitting ? "Salvando..." : "Salvar nova senha"}</button>
+        <button className="auth-link" type="button" onClick={onLogout}>Sair</button>
+      </form>
+    </AuthLayout>
+  );
+}
+
+function AuthLayout({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
+  return (
+    <main className="auth-page">
+      <section className="auth-card">
+        <span className="brand-mark"><TerminalIcon /></span>
+        <div className="auth-heading"><span>Linux Tutor</span><h1>{title}</h1><p>{subtitle}</p></div>
+        {children}
+      </section>
+    </main>
+  );
+}
+
+async function logout(afterLogout: () => void) {
+  await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+  afterLogout();
 }

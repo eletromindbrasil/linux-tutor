@@ -7,6 +7,24 @@ services:
     command: ["true"]
     restart: "no"
 
+  database:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: linux_tutor
+      POSTGRES_USER: linux_tutor
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no arquivo .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - database_private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U linux_tutor -d linux_tutor"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    restart: unless-stopped
+
   app:
     image: linux-tutor-app:local
     build:
@@ -15,16 +33,31 @@ services:
     depends_on:
       sandbox-image:
         condition: service_completed_successfully
+      database:
+        condition: service_healthy
     environment:
       PORT: "4173"
       SESSION_IMAGE: linux-tutor-sandbox:local
       DOCKER_SOCKET: /var/run/docker.sock
       LESSONS_PATH: /app/content/lessons
+      DB_HOST: database
+      DB_PORT: "5432"
+      DB_NAME: linux_tutor
+      DB_USER: linux_tutor
+      DB_PASSWORD: ${DB_PASSWORD}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-eletromind.brasil@gmail.com}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-12345678}
+      INSTANCE_ID: ${INSTANCE_ID:-linuxtutor}
+      APP_ORIGIN: ${APP_ORIGIN:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
     ports:
       - "127.0.0.1:4173:4173"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./content:/app/content:ro
+    networks:
+      - app_public
+      - database_private
     healthcheck:
       test:
         - CMD
@@ -33,6 +66,14 @@ services:
         - "fetch('http://127.0.0.1:4173/api/health').then(response => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))"
       interval: 5s
       timeout: 3s
-      retries: 10
-      start_period: 5s
+      retries: 15
+      start_period: 10s
     restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  app_public:
+  database_private:
+    internal: true

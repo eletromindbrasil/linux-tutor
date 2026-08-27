@@ -384,6 +384,45 @@ button:focus-visible {
   line-height: 1.5;
 }
 
+.logout-button {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-height: 42px;
+  padding: 8px;
+  margin: 6px 12px 14px;
+  overflow: hidden;
+  color: #929c95;
+  background: transparent;
+  border: 1px solid #252c27;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  color: #e0e7e2;
+  background: #171c19;
+}
+
+.logout-button span {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.logout-button small {
+  width: 0;
+  overflow: hidden;
+  color: #68726b;
+  font-size: 8px;
+  opacity: 0;
+  white-space: nowrap;
+}
+
+.course-sidebar:hover .logout-button small {
+  width: 210px;
+  opacity: 1;
+}
+
 .lesson-main {
   min-width: 0;
 }
@@ -927,6 +966,120 @@ kbd {
   transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
 }
 
+.auth-page {
+  display: grid;
+  min-height: 100vh;
+  padding: 28px;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(155, 223, 98, 0.16), transparent 34%),
+    linear-gradient(rgba(223, 228, 222, 0.45) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(223, 228, 222, 0.45) 1px, transparent 1px),
+    #f4f6f3;
+  background-size: auto, 30px 30px, 30px 30px, auto;
+}
+
+.auth-card {
+  width: min(100%, 440px);
+  padding: 38px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 26px 70px rgba(22, 29, 24, 0.14);
+}
+
+.auth-heading {
+  margin: 24px 0 28px;
+}
+
+.auth-heading > span {
+  color: #4a7841;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.auth-heading h1 {
+  margin: 8px 0 10px;
+  color: var(--ink);
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.auth-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.auth-form {
+  display: grid;
+  gap: 17px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 7px;
+  color: #3f4c43;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.auth-form label small {
+  color: #7e8881;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.auth-form input {
+  width: 100%;
+  height: 44px;
+  padding: 0 13px;
+  color: var(--ink);
+  background: #fbfcfa;
+  border: 1px solid #d7ded8;
+  border-radius: 9px;
+}
+
+.auth-form input:focus {
+  outline: 3px solid rgba(94, 144, 71, 0.15);
+  border-color: #79a866;
+}
+
+.auth-form .primary-button {
+  min-height: 44px;
+  margin-top: 3px;
+  font-weight: 700;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.auth-form .primary-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.auth-error {
+  padding: 10px 12px;
+  margin: 0;
+  color: #8a3d35;
+  font-size: 11px;
+  line-height: 1.5;
+  background: #fff0ee;
+  border: 1px solid #f1d0cc;
+  border-radius: 8px;
+}
+
+.auth-link {
+  color: #647068;
+  font-size: 11px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
 .practice-actions button:hover:not(:disabled),
 .next-button:hover {
   transform: translateY(-1px);
@@ -1241,6 +1394,12 @@ kbd {
     border-color: #242b26;
   }
 
+  .logout-button small,
+  .course-sidebar:hover .logout-button small {
+    width: 210px;
+    opacity: 1;
+  }
+
   .course-sidebar.is-open {
     transform: translateX(0);
   }
@@ -1346,6 +1505,13 @@ kbd {
 }
 
 @media (max-width: 560px) {
+  .auth-page {
+    padding: 14px;
+  }
+
+  .auth-card {
+    padding: 27px 22px;
+  }
   .lesson-heading h1 {
     font-size: 36px;
   }

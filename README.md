@@ -1,6 +1,7 @@
 # Linux Tutor
 
-Aplicação web local para aprender Linux praticando em terminais reais e isolados.
+Aplicação web para aprender Linux praticando em terminais reais e isolados, com autenticação e
+progresso persistente por usuário.
 
 Repositório: <https://github.com/eletromindbrasil/linux-tutor>
 
@@ -46,6 +47,27 @@ docker compose up --build -d
 
 Abra `http://127.0.0.1:4173`.
 
+No primeiro acesso, use:
+
+- usuário: `eletromind.brasil@gmail.com`
+- senha temporária: `12345678`
+
+O acesso às aulas permanece bloqueado até a troca da senha. A senha oficial precisa ter pelo
+menos 10 caracteres. A senha é armazenada como hash `scrypt`; o valor temporário serve somente
+para criar o usuário quando o banco ainda está vazio.
+
+O `iniciar.sh` cria um `.env` privado, com senha aleatória para o PostgreSQL e identificador único
+para esta implantação. Para configurar manualmente ou usar outro domínio, copie `.env.example`
+para `.env`. Em uma VPS com proxy HTTPS, defina também:
+
+```dotenv
+APP_ORIGIN=https://linux.seudominio.com
+COOKIE_SECURE=true
+```
+
+O serviço continua publicado somente em `127.0.0.1:4173`; o proxy reverso deve ser o único ponto
+de entrada público e precisa encaminhar upgrades WebSocket.
+
 Para acompanhar os logs:
 
 ```bash
@@ -61,14 +83,17 @@ Para encerrar e remover os contêineres:
 ## Segurança do protótipo
 
 - A aplicação é publicada apenas em `127.0.0.1`.
+- Login, troca obrigatória no primeiro acesso e sessões HttpOnly protegem todas as aulas e terminais.
+- O PostgreSQL não publica portas e participa somente de uma rede Docker interna deste projeto.
+- O progresso é persistido no volume Compose `postgres_data`, separado dos demais projetos da VPS.
 - Cada lição usa um contêiner descartável sem acesso à rede.
 - O terminal roda como usuário não privilegiado.
 - CPU, memória, processos e capabilities são limitados.
 - Reiniciar a lição remove o contêiner anterior.
 
-O app monta o socket local do Docker para criar e remover os ambientes de prática. Por esse
-motivo, ele deve continuar restrito à máquina local e não deve ser publicado na internet sem
-uma arquitetura de isolamento adicional.
+O app monta o socket local do Docker para criar e remover os ambientes de prática. Esse socket
+equivale a acesso administrativo ao Docker; por isso, mantenha a porta do app em loopback, use
+HTTPS no proxy e não compartilhe o container da aplicação com serviços não confiáveis.
 
 ## Contribuir e licença
 

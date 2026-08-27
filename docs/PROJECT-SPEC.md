@@ -40,9 +40,8 @@ na mesma entrega:
 
 ## 2. Visão do produto
 
-O Linux Tutor é uma aplicação web local, pessoal e sem autenticação para ensinar Linux,
-terminal e ferramentas de linha de comando a desenvolvedores iniciantes, evoluindo até tópicos
-avançados.
+O Linux Tutor é uma aplicação web pessoal com autenticação para ensinar Linux, terminal e
+ferramentas de linha de comando a desenvolvedores iniciantes, evoluindo até tópicos avançados.
 
 O aprendizado acontece por prática:
 
@@ -65,8 +64,8 @@ O aprendizado acontece por prática:
 
 ### Fora do escopo atual
 
-- Autenticação, múltiplos usuários ou sincronização em nuvem.
-- Publicação da aplicação diretamente na internet.
+- Cadastro público, recuperação de senha por e-mail ou sincronização em nuvem.
+- Publicação direta do container sem proxy HTTPS e controles de perímetro.
 - Certificação formal ou emissão de certificados.
 - Ambiente multiusuário compartilhado.
 - Conteúdo completo das aulas dentro desta spec.
@@ -77,7 +76,7 @@ O aprendizado acontece por prática:
 |---|---|---|
 | DEC-001 | O projeto é totalmente independente do CortexPro. | vigente |
 | DEC-002 | A experiência principal é uma aplicação web local. | vigente |
-| DEC-003 | Não há autenticação; o uso é pessoal e local. | vigente |
+| DEC-003 | Não há autenticação; o uso é pessoal e local. | superada por DEC-013 |
 | DEC-004 | O terminal deve executar Linux real em contêiner descartável. | vigente |
 | DEC-005 | A correção prioriza estado final; histórico só é exigido quando o comando faz parte do objetivo. | vigente |
 | DEC-006 | As lições devem ser independentes, reiniciáveis e reproduzíveis. | vigente |
@@ -87,6 +86,9 @@ O aprendizado acontece por prática:
 | DEC-010 | O conteúdo didático de cada lição será produzido individualmente e fora desta spec. | vigente |
 | DEC-011 | Tarefas que exigirem kernel, boot, discos reais ou privilégios amplos deverão usar VM ou laboratório específico, não o contêiner padrão. | vigente |
 | DEC-012 | A primeira versão do contrato de conteúdo usa um `lesson.json` validado por lição; formatos adicionais só devem ser adotados com migração compatível. | vigente |
+| DEC-013 | O acesso usa conta persistida, sessão HttpOnly e troca obrigatória da senha temporária no primeiro login. | vigente |
+| DEC-014 | A senha oficial exige no mínimo 10 caracteres e é armazenada somente como hash `scrypt`. | vigente |
+| DEC-015 | O PostgreSQL da aplicação não publica portas e usa rede interna e volume exclusivos do projeto Compose. | vigente |
 
 ## 4. Estado atual da implementação
 
@@ -95,7 +97,7 @@ O aprendizado acontece por prática:
 | ID | Funcionalidade | Status | Evidência principal |
 |---|---|---|---|
 | SYS-001 | Aplicação React/Vite servida localmente | done | build Docker e health check |
-| SYS-002 | Backend Node/Express sem autenticação | done | `/api/health` e `/api/lessons` |
+| SYS-002 | Backend Node/Express com autenticação | done | login, sessão, logout e troca de senha |
 | SYS-003 | Terminal web com xterm.js e WebSocket | done | smoke test das nove lições |
 | SYS-004 | Terminal conectado a Debian real | done | comandos executados no sandbox |
 | SYS-005 | Contêiner descartável por sessão de lição | done | criação e remoção pela API |
@@ -105,7 +107,7 @@ O aprendizado acontece por prática:
 | SYS-009 | Verificação por histórico de comandos | done | lições de navegação e arquivos |
 | SYS-010 | Feedback individual por critério | done | painel de verificação |
 | SYS-011 | Dicas progressivas | done | ação `Pedir dica` |
-| SYS-012 | Progresso salvo em `localStorage` | done-prototype | conclusão por navegador/origem |
+| SYS-012 | Progresso persistido por usuário no PostgreSQL | done | conclusão sobrevive a navegador e reinício |
 | SYS-013 | Avanço para próxima lição | done | fluxo verificado |
 | SYS-014 | Proteção contra resize atrasado durante troca de lição | done | teste `lesson-transition` |
 | SYS-015 | Sidebar mini com expansão por hover | done | layout desktop atual |
@@ -119,6 +121,10 @@ O aprendizado acontece por prática:
 | SYS-023 | Catálogo carregado de arquivos individuais | done | `content/lessons/<id>/lesson.json` |
 | SYS-024 | Schema v1 e validador de catálogo | done | `npm run lessons:validate` |
 | SYS-025 | Solução de referência testada para cada lição | done | smoke percorre o catálogo completo |
+| SYS-026 | Troca obrigatória de senha no primeiro login | done | APIs protegidas retornam 403 até a troca |
+| SYS-027 | Banco isolado em rede interna e volume Compose | done | serviço sem porta publicada |
+| SYS-028 | Autorização de sessões HTTP e WebSocket por usuário | done | cookie HttpOnly e ownership de sandbox |
+| SYS-029 | Reconexão automática do terminal | done | três tentativas antes de orientar reinício |
 
 ### 4.2 Lições implantadas
 
@@ -166,14 +172,14 @@ LinuxTutor/
 ### 4.4 Limitações conhecidas
 
 - O formato v1 concentra conteúdo, setup, checks e solução em `lesson.json`; a separação em Markdown/scripts pode ser avaliada quando o contrato estabilizar.
-- O progresso está restrito ao `localStorage`; trocar de navegador/perfil perde o progresso.
 - Reiniciar o backend encerra sessões em andamento.
 - Não existe retomada do estado de um contêiner após fechar o navegador.
 - O histórico é um arquivo Bash simples, não um registro estruturado com timestamp, cwd e exit code.
 - Os tipos de verificadores ainda são comandos shell definidos diretamente em cada lição.
 - Existe validador de schema, mas ainda não existe uma interface ou gerador assistido de autoria.
 - Não existem bloqueios por pré-requisito ou teste de nivelamento.
-- O app monta o socket do Docker e, portanto, deve permanecer estritamente local.
+- O app monta o socket do Docker; a publicação deve permanecer em loopback atrás de proxy HTTPS.
+- Não há recuperação de senha por e-mail; uma redefinição administrativa ainda exige acesso ao banco.
 - O contêiner padrão não serve para tarefas reais de boot, kernel, systemd, discos ou root amplo.
 - A qualidade pedagógica final das nove aulas ainda não foi formalmente revisada.
 
@@ -257,7 +263,7 @@ Cada lição deverá possuir, fora desta spec:
 | ENG-003 | Biblioteca declarativa de checks | P0 | partial | arquivos, conteúdo, modo, owner, processo, saída e histórico |
 | ENG-004 | Test runner de lições | P0 | done | setup e solução de referência testados em CI/local |
 | ENG-005 | Registro estruturado de comandos | P1 | planned | comando, cwd, horário, exit code e duração |
-| ENG-006 | Persistência SQLite | P1 | planned | progresso independe do perfil do navegador |
+| ENG-006 | Persistência PostgreSQL | P1 | done | progresso independe do perfil do navegador |
 | ENG-007 | Pré-requisitos e desbloqueio | P1 | planned | trilha respeita dependências configuradas |
 | ENG-008 | Retomar última lição | P1 | partial | abre a primeira lição incompleta; ainda não restaura sessão |
 | ENG-009 | Catálogo, busca e filtros | P1 | planned | localizar por módulo, nível ou comando |
@@ -270,7 +276,7 @@ Cada lição deverá possuir, fora desta spec:
 | ENG-016 | Múltiplas imagens de laboratório | P1 | planned | Debian/Ubuntu e ambientes especializados |
 | ENG-017 | Backend de VM para tópicos privilegiados | P2 | planned | exercícios de boot/kernel/disco isolados do host |
 | ENG-018 | Limpeza robusta após encerramento abrupto | P0 | partial | nenhum sandbox órfão após crash/restart |
-| ENG-019 | Recuperação visual de terminal desconectado | P0 | partial | reconectar/recriar sem recarregar todo o app |
+| ENG-019 | Recuperação visual de terminal desconectado | P0 | done | reconecta até três vezes e oferece reset do ambiente |
 | ENG-020 | Acessibilidade e navegação por teclado | P1 | planned | fluxo principal utilizável sem mouse |
 | ENG-021 | Testes visuais desktop/mobile | P1 | planned | snapshots das telas e estados principais |
 | ENG-022 | Empacotamento/atalho desktop opcional | P2 | planned | iniciar sem usar comandos manualmente |
@@ -559,3 +565,5 @@ O serviço `app` deve aparecer como `healthy`.
 | 2026-08-02 | Lições migradas para schema v1 individual e implantadas M01-L02, M01-L03 e M01-L04. |
 | 2026-08-02 | Concluído o módulo M02 com lições de cópia/movimentação, remoção segura, links e estrutura de diretórios. |
 | 2026-08-02 | Preparada distribuição pública com documentação portátil, guia de contribuição e licença MIT. |
+| 2026-08-27 | Implantados PostgreSQL isolado, autenticação, troca obrigatória no primeiro login e progresso por usuário. |
+| 2026-08-27 | Reativado e reforçado o terminal com origem compatível com proxy, ownership por usuário, reconexão e limpeza por instância. |

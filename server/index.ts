@@ -8,13 +8,46 @@ import express from "express";
 import { WebSocket, WebSocketServer } from "ws";
 
 import { publicLesson, type LessonDefinition } from "../shared/lessons.js";
+import {
+  authenticatedUser,
+  expiredSessionCookie,
+  parseCookies,
+  requireUser,
+  sessionCookie,
+  sessionCookieName
+} from "./auth.js";
+import {
+  bootstrapInitialUser,
+  cleanExpiredLoginSessions,
+  completeLesson,
+  completedLessons,
+  createLoginSession,
+  database,
+  databaseIsReady,
+  deleteLoginSession,
+  findUserBySessionToken,
+  findUserWithPassword,
+  migrateDatabase,
+  updatePassword
+} from "./database.js";
 import { loadLessons } from "./lessonRepository.js";
+import {
+  hashPassword,
+  newSessionToken,
+  normalizeEmail,
+  validatePassword,
+  verifyPassword
+} from "./security.js";
 
 const port = Number(process.env.PORT ?? 4173);
 const socketPath = process.env.DOCKER_SOCKET ?? "/var/run/docker.sock";
 const sessionImage = process.env.SESSION_IMAGE ?? "linux-tutor-sandbox:local";
+const instanceId = process.env.INSTANCE_ID ?? "linux-tutor-local";
+const loginSessionSeconds = 7 * 24 * 60 * 60;
+const invalidPasswordHash = await hashPassword(randomUUID());
 const docker = new Docker({ socketPath });
 const app = express();
+app.set("trust proxy", 1);
 const server = createServer(app);
 const webSocketServer = new WebSocketServer({ noServer: true });
 const currentFile = fileURLToPath(import.meta.url);
@@ -22,6 +55,7 @@ const publicDirectory = path.resolve(path.dirname(currentFile), "../../dist");
 
 interface LearningSession {
   id: string;
+  userId: string;
   lesson: LessonDefinition;
   container: Docker.Container;
   createdAt: number;
@@ -33,8 +67,20 @@ const sessions = new Map<string, LearningSession>();
 app.use(express.json({ limit: "16kb" }));
 
 app.use((request, response, next) => {
+  response.setHeader("X-Content-Type-Options", "nosniff");
+  response.setHeader("X-Frame-Options", "DENY");
+  response.setHeader("Referrer-Policy", "no-referrer");
+  response.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; base-uri 'self'; connect-src 'self' ws: wss:; frame-ancestors 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+  );
+  if (request.path.startsWith("/api/")) response.setHeader("Cache-Control", "no-store");
+  next();
+});
+
+app.use((request, response, next) => {
   const origin = request.headers.origin;
-  if (origin && !/^http:\/\/(127\.0\.0\.1|localhost):4173$/.test(origin)) {
+  if (origin && !allowedOrigin(request, origin)) {
     response.status(403).json({ error: "Origem não permitida." });
     return;
   }
@@ -43,14 +89,101 @@ app.use((request, response, next) => {
 
 app.get("/api/health", async (_request, response) => {
   try {
-    await docker.ping();
-    response.json({ ok: true, docker: "ready" });
+    await Promise.all([docker.ping(), databaseIsReady()]);
+    response.json({ ok: true, docker: "ready", database: "ready" });
   } catch {
-    response.status(503).json({ ok: false, docker: "unavailable" });
+    response.status(503).json({ ok: false, error: "dependency_unavailable" });
   }
 });
 
-app.get("/api/lessons", async (_request, response) => {
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+
+app.post("/api/auth/login", async (request, response) => {
+  const attemptKey = request.ip ?? "unknown";
+  const attempts = loginAttempts.get(attemptKey);
+  if (attempts && attempts.resetAt > Date.now() && attempts.count >= 10) {
+    response.status(429).json({ error: "Muitas tentativas. Aguarde 15 minutos." });
+    return;
+  }
+
+  const email = typeof request.body?.email === "string" ? normalizeEmail(request.body.email) : "";
+  const password = typeof request.body?.password === "string" ? request.body.password : "";
+  const user = email ? await findUserWithPassword(email) : null;
+  const passwordMatches = password.length <= 256
+    ? await verifyPassword(password, user?.password_hash ?? invalidPasswordHash)
+    : false;
+
+  if (!user || !passwordMatches) {
+    const current = attempts && attempts.resetAt > Date.now() ? attempts : { count: 0, resetAt: Date.now() + 15 * 60_000 };
+    current.count += 1;
+    loginAttempts.set(attemptKey, current);
+    response.status(401).json({ error: "E-mail ou senha inválidos." });
+    return;
+  }
+
+  loginAttempts.delete(attemptKey);
+  const token = newSessionToken();
+  await createLoginSession(user.id, token, new Date(Date.now() + loginSessionSeconds * 1000));
+  response.setHeader("Set-Cookie", sessionCookie(token, request, loginSessionSeconds));
+  response.json({
+    user: { id: user.id, email: user.email, mustChangePassword: user.must_change_password },
+    completedLessonIds: await completedLessons(user.id)
+  });
+});
+
+app.get("/api/auth/session", async (request, response) => {
+  const user = await authenticatedUser(request);
+  if (!user) {
+    response.status(401).json({ error: "Sessão não autenticada." });
+    return;
+  }
+  response.json({ user, completedLessonIds: await completedLessons(user.id) });
+});
+
+app.post("/api/auth/change-password", async (request, response) => {
+  const user = await authenticatedUser(request);
+  if (!user) {
+    response.status(401).json({ error: "Faça login para continuar." });
+    return;
+  }
+
+  const currentPassword = request.body?.currentPassword;
+  const newPassword = request.body?.newPassword;
+  const validationError = validatePassword(newPassword);
+  if (validationError) {
+    response.status(400).json({ error: validationError });
+    return;
+  }
+  if (currentPassword === newPassword) {
+    response.status(400).json({ error: "A nova senha deve ser diferente da senha temporária." });
+    return;
+  }
+
+  const storedUser = await findUserWithPassword(user.email);
+  if (!storedUser || typeof currentPassword !== "string" || !(await verifyPassword(currentPassword, storedUser.password_hash))) {
+    response.status(401).json({ error: "A senha atual está incorreta." });
+    return;
+  }
+
+  await updatePassword(user.id, await hashPassword(newPassword));
+  const token = newSessionToken();
+  await createLoginSession(user.id, token, new Date(Date.now() + loginSessionSeconds * 1000));
+  response.setHeader("Set-Cookie", sessionCookie(token, request, loginSessionSeconds));
+  response.json({
+    user: { ...user, mustChangePassword: false },
+    completedLessonIds: await completedLessons(user.id)
+  });
+});
+
+app.post("/api/auth/logout", async (request, response) => {
+  const token = parseCookies(request.headers.cookie).get(sessionCookieName);
+  if (token) await deleteLoginSession(token);
+  response.setHeader("Set-Cookie", expiredSessionCookie(request));
+  response.status(204).end();
+});
+
+app.get("/api/lessons", async (request, response) => {
+  if (!(await requireUser(request, response))) return;
   try {
     const lessons = await loadLessons();
     response.json({ lessons: lessons.map(publicLesson) });
@@ -61,6 +194,8 @@ app.get("/api/lessons", async (_request, response) => {
 });
 
 app.post("/api/sessions", async (request, response) => {
+  const user = await requireUser(request, response);
+  if (!user) return;
   const lessons = await loadLessons();
   const lesson = lessons.find((candidate) => candidate.id === request.body?.lessonId);
   if (!lesson) {
@@ -69,7 +204,7 @@ app.post("/api/sessions", async (request, response) => {
   }
 
   try {
-    const learningSession = await createLearningSession(lesson);
+    const learningSession = await createLearningSession(lesson, user.id);
     response.status(201).json({
       sessionId: learningSession.id,
       lessonId: lesson.id,
@@ -82,8 +217,10 @@ app.post("/api/sessions", async (request, response) => {
 });
 
 app.post("/api/sessions/:sessionId/verify", async (request, response) => {
+  const user = await requireUser(request, response);
+  if (!user) return;
   const learningSession = sessions.get(request.params.sessionId);
-  if (!learningSession) {
+  if (!learningSession || learningSession.userId !== user.id) {
     response.status(404).json({ error: "Esta sessão não está mais disponível." });
     return;
   }
@@ -101,13 +238,22 @@ app.post("/api/sessions/:sessionId/verify", async (request, response) => {
     });
   }
 
+  const passed = results.every((result) => result.passed);
+  if (passed) await completeLesson(user.id, learningSession.lesson.id);
   response.json({
-    passed: results.every((result) => result.passed),
+    passed,
     results
   });
 });
 
 app.delete("/api/sessions/:sessionId", async (request, response) => {
+  const user = await requireUser(request, response);
+  if (!user) return;
+  const learningSession = sessions.get(request.params.sessionId);
+  if (learningSession && learningSession.userId !== user.id) {
+    response.status(404).json({ error: "Esta sessão não está mais disponível." });
+    return;
+  }
   await destroySession(request.params.sessionId);
   response.status(204).end();
 });
@@ -118,10 +264,40 @@ app.get("/{*path}", (_request, response) => {
 });
 
 server.on("upgrade", (request, socket, head) => {
+  void authorizeTerminalUpgrade(request, socket, head).catch((error) => {
+    console.error("Terminal authorization failed", error);
+    if (!socket.destroyed) {
+      socket.write("HTTP/1.1 503 Service Unavailable\r\n\r\n");
+      socket.destroy();
+    }
+  });
+});
+
+async function authorizeTerminalUpgrade(
+  request: IncomingMessage,
+  socket: import("node:stream").Duplex,
+  head: Buffer
+) {
   const url = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`);
   const sessionId = url.searchParams.get("sessionId");
+  const origin = request.headers.origin;
+  const token = parseCookies(request.headers.cookie).get(sessionCookieName);
+  const user = token ? await findUserBySessionToken(token) : null;
+  const learningSession = sessionId ? sessions.get(sessionId) : null;
 
-  if (url.pathname !== "/api/terminal" || !sessionId || !sessions.has(sessionId)) {
+  if (!user) {
+    socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+    socket.destroy();
+    return;
+  }
+
+  if (origin && !allowedOrigin(request, origin)) {
+    socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+    socket.destroy();
+    return;
+  }
+
+  if (url.pathname !== "/api/terminal" || !sessionId || !learningSession || learningSession.userId !== user.id) {
     socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
     socket.destroy();
     return;
@@ -130,7 +306,7 @@ server.on("upgrade", (request, socket, head) => {
   webSocketServer.handleUpgrade(request, socket, head, (webSocket) => {
     webSocketServer.emit("connection", webSocket, request, sessionId);
   });
-});
+}
 
 webSocketServer.on(
   "connection",
@@ -211,7 +387,7 @@ webSocketServer.on(
   }
 );
 
-async function createLearningSession(lesson: LessonDefinition): Promise<LearningSession> {
+async function createLearningSession(lesson: LessonDefinition, userId: string): Promise<LearningSession> {
   await docker.getImage(sessionImage).inspect();
 
   const id = randomUUID();
@@ -223,6 +399,7 @@ async function createLearningSession(lesson: LessonDefinition): Promise<Learning
     Cmd: ["sleep", "infinity"],
     Labels: {
       "linux-tutor.session": "true",
+      "linux-tutor.instance": instanceId,
       "linux-tutor.lesson": lesson.id
     },
     HostConfig: {
@@ -253,6 +430,7 @@ async function createLearningSession(lesson: LessonDefinition): Promise<Learning
 
   const learningSession: LearningSession = {
     id,
+    userId,
     lesson,
     container,
     createdAt: Date.now(),
@@ -301,7 +479,7 @@ async function destroySession(sessionId: string) {
 async function removeOrphanContainers() {
   const containers = await docker.listContainers({
     all: true,
-    filters: { label: ["linux-tutor.session=true"] }
+    filters: { label: ["linux-tutor.session=true", `linux-tutor.instance=${instanceId}`] }
   });
 
   await Promise.all(
@@ -321,9 +499,22 @@ const cleanupTimer = setInterval(() => {
 }, 5 * 60 * 1000);
 cleanupTimer.unref();
 
+const loginCleanupTimer = setInterval(() => {
+  const now = Date.now();
+  for (const [key, attempt] of loginAttempts) {
+    if (attempt.resetAt <= now) loginAttempts.delete(key);
+  }
+  void cleanExpiredLoginSessions().catch((error) => {
+    console.error("Failed to clean expired login sessions", error);
+  });
+}, 60 * 60 * 1000);
+loginCleanupTimer.unref();
+
 async function shutdown() {
   clearInterval(cleanupTimer);
+  clearInterval(loginCleanupTimer);
   await Promise.all([...sessions.keys()].map(destroySession));
+  await database.end();
   server.close(() => process.exit(0));
   setTimeout(() => process.exit(1), 5_000).unref();
 }
@@ -332,7 +523,9 @@ process.on("SIGTERM", () => void shutdown());
 process.on("SIGINT", () => void shutdown());
 
 try {
-  await docker.ping();
+  await Promise.all([docker.ping(), databaseIsReady()]);
+  await migrateDatabase();
+  await bootstrapInitialUser();
   const availableLessons = await loadLessons();
   await removeOrphanContainers();
   server.listen(port, "0.0.0.0", () => {
@@ -341,6 +534,23 @@ try {
     );
   });
 } catch (error) {
-  console.error("Docker Engine is required to start Linux Tutor", error);
+  console.error("Linux Tutor could not initialize its dependencies", error);
   process.exit(1);
+}
+
+function allowedOrigin(request: IncomingMessage, origin: string) {
+  const configuredOrigins = (process.env.APP_ORIGIN ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (configuredOrigins.includes(origin)) return true;
+  if (
+    process.env.NODE_ENV !== "production"
+    && /^http:\/\/(127\.0\.0\.1|localhost):(4173|5173)$/.test(origin)
+  ) return true;
+
+  const forwardedProto = request.headers["x-forwarded-proto"];
+  const protocol = (Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto)?.split(",")[0]?.trim()
+    ?? (process.env.COOKIE_SECURE === "true" ? "https" : "http");
+  return origin === `${protocol}://${request.headers.host}`;
 }

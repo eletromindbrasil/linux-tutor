@@ -14,6 +14,7 @@ interface TerminalPanelProps {
 export function TerminalPanel({ sessionId, isPreparing, error }: TerminalPanelProps) {
   const terminalHost = useRef<HTMLDivElement>(null);
   const [connected, setConnected] = useState(false);
+  const [reconnecting, setReconnecting] = useState(false);
 
   useEffect(() => {
     if (!sessionId || !terminalHost.current) return;
@@ -51,50 +52,69 @@ export function TerminalPanel({ sessionId, isPreparing, error }: TerminalPanelPr
     terminal.write("\x1b[38;5;245mPreparando seu terminal Linux...\x1b[0m\r\n");
 
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const socket = new WebSocket(
-      `${protocol}://${window.location.host}/api/terminal?sessionId=${encodeURIComponent(sessionId)}`
-    );
-    socket.binaryType = "arraybuffer";
+    let socket: WebSocket | null = null;
+    let reconnectTimer: number | null = null;
+    let reconnectAttempts = 0;
+    let disposed = false;
     let receivedFirstChunk = false;
 
-    socket.addEventListener("open", () => {
-      setConnected(true);
-      socket.send(`\u0000resize:${terminal.cols}x${terminal.rows}`);
-    });
+    const connect = () => {
+      if (disposed) return;
+      socket = new WebSocket(
+        `${protocol}://${window.location.host}/api/terminal?sessionId=${encodeURIComponent(sessionId)}`
+      );
+      socket.binaryType = "arraybuffer";
 
-    socket.addEventListener("message", (event) => {
-      if (!receivedFirstChunk) {
-        terminal.reset();
-        terminal.write("\x1b[38;5;114mAmbiente pronto. Boa prática!\x1b[0m\r\n\r\n");
-        receivedFirstChunk = true;
-      }
-      const data = event.data instanceof ArrayBuffer ? new Uint8Array(event.data) : event.data;
-      terminal.write(data);
-    });
+      socket.addEventListener("open", () => {
+        reconnectAttempts = 0;
+        setConnected(true);
+        setReconnecting(false);
+        socket?.send(`\u0000resize:${terminal.cols}x${terminal.rows}`);
+      });
 
-    socket.addEventListener("close", () => {
-      setConnected(false);
-      terminal.write("\r\n\x1b[38;5;203mTerminal desconectado.\x1b[0m\r\n");
-    });
+      socket.addEventListener("message", (event) => {
+        if (!receivedFirstChunk) {
+          terminal.reset();
+          terminal.write("\x1b[38;5;114mAmbiente pronto. Boa prática!\x1b[0m\r\n\r\n");
+          receivedFirstChunk = true;
+        }
+        const data = event.data instanceof ArrayBuffer ? new Uint8Array(event.data) : event.data;
+        terminal.write(data);
+      });
 
-    socket.addEventListener("error", () => {
-      terminal.write("\r\n\x1b[38;5;203mNão foi possível conectar ao terminal.\x1b[0m\r\n");
-    });
+      socket.addEventListener("close", (event) => {
+        setConnected(false);
+        if (disposed || event.code === 1000) return;
+        if (reconnectAttempts < 3) {
+          reconnectAttempts += 1;
+          setReconnecting(true);
+          terminal.write(`\r\n\x1b[38;5;221mConexão interrompida. Reconectando (${reconnectAttempts}/3)...\x1b[0m\r\n`);
+          reconnectTimer = window.setTimeout(connect, 1_500);
+        } else {
+          setReconnecting(false);
+          terminal.write("\r\n\x1b[38;5;203mTerminal desconectado. Use Reiniciar para criar outro ambiente.\x1b[0m\r\n");
+        }
+      });
+    };
+
+    connect();
 
     const inputDisposable = terminal.onData((data) => {
-      if (socket.readyState === WebSocket.OPEN) socket.send(data);
+      if (socket?.readyState === WebSocket.OPEN) socket.send(data);
     });
     const resizeDisposable = terminal.onResize(({ cols, rows }) => {
-      if (socket.readyState === WebSocket.OPEN) socket.send(`\u0000resize:${cols}x${rows}`);
+      if (socket?.readyState === WebSocket.OPEN) socket.send(`\u0000resize:${cols}x${rows}`);
     });
     const resizeObserver = new ResizeObserver(() => fitAddon.fit());
     resizeObserver.observe(terminalHost.current);
 
     return () => {
+      disposed = true;
+      if (reconnectTimer !== null) window.clearTimeout(reconnectTimer);
       resizeObserver.disconnect();
       inputDisposable.dispose();
       resizeDisposable.dispose();
-      socket.close();
+      socket?.close(1000, "Interface encerrada");
       terminal.dispose();
       setConnected(false);
     };
@@ -108,7 +128,7 @@ export function TerminalPanel({ sessionId, isPreparing, error }: TerminalPanelPr
           <span>Terminal</span>
           <span className={`connection-pill ${connected ? "is-online" : ""}`}>
             <span className="status-dot" />
-            {connected ? "Ambiente ativo" : isPreparing ? "Preparando" : "Desconectado"}
+            {connected ? "Ambiente ativo" : isPreparing ? "Preparando" : reconnecting ? "Reconectando" : "Desconectado"}
           </span>
         </div>
         <div className="window-dots" aria-hidden="true">
