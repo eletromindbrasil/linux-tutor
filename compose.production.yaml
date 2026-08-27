@@ -1,23 +1,108 @@
+version: "3.8"
+
 services:
-  app:
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: cortexpro_proxy
-      traefik.http.middlewares.linux-tutor-https-redirect.redirectscheme.scheme: https
-      traefik.http.routers.linux-tutor-http.entrypoints: web
-      traefik.http.routers.linux-tutor-http.middlewares: linux-tutor-https-redirect
-      traefik.http.routers.linux-tutor-http.rule: Host(`linux.eletromind.cloud`)
-      traefik.http.routers.linux-tutor.entrypoints: websecure
-      traefik.http.routers.linux-tutor.rule: Host(`linux.eletromind.cloud`)
-      traefik.http.routers.linux-tutor.tls: "true"
-      traefik.http.routers.linux-tutor.tls.certresolver: letsencrypt
-      traefik.http.services.linux-tutor.loadbalancer.server.port: "4173"
+  database:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: linux_tutor
+      POSTGRES_USER: linux_tutor
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD ausente}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - app_public
       - database_private
-      - proxy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U linux_tutor -d linux_tutor"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  app:
+    image: linux-tutor-app:${IMAGE_TAG:?IMAGE_TAG ausente}
+    environment:
+      PORT: "4173"
+      SESSION_IMAGE: linux-tutor-sandbox:${IMAGE_TAG}
+      DOCKER_SOCKET: /var/run/docker.sock
+      LESSONS_PATH: /app/content/lessons
+      DB_HOST: database
+      DB_PORT: "5432"
+      DB_NAME: linux_tutor
+      DB_USER: linux_tutor
+      DB_PASSWORD: ${DB_PASSWORD}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-eletromind.brasil@gmail.com}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-12345678}
+      INSTANCE_ID: linux-tutor-production
+      APP_ORIGIN: https://linux.eletrovps.com
+      COOKIE_SECURE: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - eletrocloud
+      - database_private
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:4173/api/health').then(response => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 15s
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+      labels:
+        traefik.enable: "true"
+        traefik.docker.network: eletrocloud
+        traefik.http.services.linux-tutor.loadbalancer.server.port: "4173"
+        traefik.http.services.linux-tutor.loadbalancer.passhostheader: "true"
+        traefik.http.middlewares.linux-tutor-ratelimit.ratelimit.average: "120"
+        traefik.http.middlewares.linux-tutor-ratelimit.ratelimit.burst: "60"
+        traefik.http.middlewares.linux-tutor-session-ratelimit.ratelimit.average: "5"
+        traefik.http.middlewares.linux-tutor-session-ratelimit.ratelimit.burst: "3"
+        traefik.http.middlewares.linux-tutor-session-inflight.inflightreq.amount: "6"
+        traefik.http.routers.linux-tutor.rule: Host(`linux.eletrovps.com`)
+        traefik.http.routers.linux-tutor.entrypoints: websecure
+        traefik.http.routers.linux-tutor.tls.certresolver: letsencryptresolver
+        traefik.http.routers.linux-tutor.middlewares: linux-tutor-ratelimit
+        traefik.http.routers.linux-tutor-session.rule: Host(`linux.eletrovps.com`) && Path(`/api/sessions`) && Method(`POST`)
+        traefik.http.routers.linux-tutor-session.entrypoints: websecure
+        traefik.http.routers.linux-tutor-session.tls.certresolver: letsencryptresolver
+        traefik.http.routers.linux-tutor-session.middlewares: linux-tutor-session-ratelimit,linux-tutor-session-inflight
+        traefik.http.routers.linux-tutor-session.service: linux-tutor
+
+volumes:
+  postgres_data:
 
 networks:
-  proxy:
+  eletrocloud:
     external: true
-    name: cortexpro_proxy
+  database_private:
+    driver: overlay
+    internal: true

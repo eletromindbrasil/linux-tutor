@@ -568,4 +568,4 @@ O serviço `app` deve aparecer como `healthy`.
 | 2026-08-02 | Preparada distribuição pública com documentação portátil, guia de contribuição e licença MIT. |
 | 2026-08-27 | Implantados PostgreSQL isolado, autenticação, troca obrigatória no primeiro login e progresso por usuário. |
 | 2026-08-27 | Reativado e reforçado o terminal com origem compatível com proxy, ownership por usuário, reconexão e limpeza por instância. |
-| 2026-08-27 | Automatizado deploy em `linux.eletromind.cloud` via GitHub Actions e usuário SSH dedicado. |
+| 2026-08-27 | Automatizado deploy da stack original em `linux.eletrovps.com` via GitHub Actions e Portainer. |

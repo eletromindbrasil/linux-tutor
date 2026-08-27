@@ -70,15 +70,17 @@ de entrada público e precisa encaminhar upgrades WebSocket.
 
 ## Deploy de produção
 
-Cada push na branch `main` executa o workflow `.github/workflows/deploy-production.yml`. Ele acessa
-a VPS com o usuário dedicado `linux-tutor-deploy`, aplica `compose.production.yaml`, integra o app
-ao Traefik existente e valida autenticação e as nove lições. O ambiente público é
-<https://linux.eletromind.cloud>.
+Cada push na branch `main` executa o workflow `.github/workflows/deploy-production.yml`. Ele usa a
+API do Portainer da VPS original para construir imagens vinculadas ao commit, atualizar a stack
+Swarm `linux-tutor` e validar autenticação, troca de senha e os terminais das nove lições. O ambiente
+público é <https://linux.eletrovps.com>.
 
-Os segredos SSH ficam no environment `production` do GitHub. O banco, o `.env` e o volume de dados
-permanecem na VPS e não são copiados para o repositório ou para os logs do Actions.
+As credenciais do Portainer ficam no environment `production` do GitHub. O PostgreSQL usa volume e
+rede interna exclusivos da stack, sem porta publicada. Senhas, dados e sessões permanecem na VPS e
+não são copiados para o repositório ou para os logs do Actions.
 
-Para acompanhar os logs:
+Em produção, os serviços e logs ficam na stack `linux-tutor` do Portainer. Para acompanhar a
+instalação local:
 
 ```bash
 docker compose logs -f app
@@ -92,10 +94,11 @@ Para encerrar e remover os contêineres:
 
 ## Segurança do protótipo
 
-- A aplicação é publicada apenas em `127.0.0.1`.
+- Em produção, a aplicação não publica portas; apenas o Traefik da rede `eletrocloud` alcança o serviço.
 - Login, troca obrigatória no primeiro acesso e sessões HttpOnly protegem todas as aulas e terminais.
 - O PostgreSQL não publica portas e participa somente de uma rede Docker interna deste projeto.
-- O progresso é persistido no volume Compose `postgres_data`, separado dos demais projetos da VPS.
+- O progresso é persistido no volume Swarm `linux-tutor_postgres_data`, separado dos demais projetos
+  da VPS.
 - Cada lição usa um contêiner descartável sem acesso à rede.
 - O terminal roda como usuário não privilegiado.
 - CPU, memória, processos e capabilities são limitados.

@@ -14,49 +14,19 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy to VPS
+    name: Deploy to Eletromind VPS
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     environment:
       name: production
-      url: https://linux.eletromind.cloud
+      url: https://linux.eletrovps.com
 
     steps:
-      - name: Configure SSH
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+
+      - name: Build, deploy and validate through Portainer
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
-        run: |
-          install -d -m 700 ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/linux_tutor_deploy
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/linux_tutor_deploy ~/.ssh/known_hosts
-
-      - name: Deploy exact commit
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-        run: |
-          ssh -i ~/.ssh/linux_tutor_deploy \
-            -o BatchMode=yes \
-            -o IdentitiesOnly=yes \
-            "$VPS_USER@$VPS_HOST" "bash -s -- '$GITHUB_SHA'" <<'REMOTE'
-          set -euo pipefail
-          release_sha="$1"
-          deploy_directory=/opt/linux-tutor
-
-          if [[ ! -d "$deploy_directory/.git" ]]; then
-            git clone https://github.com/eletromindbrasil/linux-tutor.git "$deploy_directory"
-          fi
-
-          cd "$deploy_directory"
-          git fetch --depth=1 origin "$release_sha"
-          git checkout --detach --force "$release_sha"
-          ./scripts/deploy-production.sh
-          REMOTE
-
-      - name: Verify public endpoint
-        run: |
-          curl --retry 30 --retry-delay 2 --retry-all-errors \
-            --fail --show-error --silent \
-            https://linux.eletromind.cloud/api/health
+          PORTAINER_URL: ${{ secrets.PORTAINER_URL }}
+          PORTAINER_API_KEY: ${{ secrets.PORTAINER_API_KEY }}
+        run: python3 scripts/deploy-production.py
