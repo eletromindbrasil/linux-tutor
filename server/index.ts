@@ -47,6 +47,7 @@ const loginSessionSeconds = 7 * 24 * 60 * 60;
 const invalidPasswordHash = await hashPassword(randomUUID());
 const docker = new Docker({ socketPath });
 const app = express();
+app.disable("x-powered-by");
 app.set("trust proxy", 1);
 const server = createServer(app);
 const webSocketServer = new WebSocketServer({ noServer: true });
