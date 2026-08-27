@@ -1,0 +1,23 @@
+services:
+  app:
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: cortexpro_proxy
+      traefik.http.middlewares.linux-tutor-https-redirect.redirectscheme.scheme: https
+      traefik.http.routers.linux-tutor-http.entrypoints: web
+      traefik.http.routers.linux-tutor-http.middlewares: linux-tutor-https-redirect
+      traefik.http.routers.linux-tutor-http.rule: Host(`linux.eletromind.cloud`)
+      traefik.http.routers.linux-tutor.entrypoints: websecure
+      traefik.http.routers.linux-tutor.rule: Host(`linux.eletromind.cloud`)
+      traefik.http.routers.linux-tutor.tls: "true"
+      traefik.http.routers.linux-tutor.tls.certresolver: letsencrypt
+      traefik.http.services.linux-tutor.loadbalancer.server.port: "4173"
+    networks:
+      - app_public
+      - database_private
+      - proxy
+
+networks:
+  proxy:
+    external: true
+    name: cortexpro_proxy

@@ -68,6 +68,16 @@ COOKIE_SECURE=true
 O serviço continua publicado somente em `127.0.0.1:4173`; o proxy reverso deve ser o único ponto
 de entrada público e precisa encaminhar upgrades WebSocket.
 
+## Deploy de produção
+
+Cada push na branch `main` executa o workflow `.github/workflows/deploy-production.yml`. Ele acessa
+a VPS com o usuário dedicado `linux-tutor-deploy`, aplica `compose.production.yaml`, integra o app
+ao Traefik existente e valida autenticação e as nove lições. O ambiente público é
+<https://linux.eletromind.cloud>.
+
+Os segredos SSH ficam no environment `production` do GitHub. O banco, o `.env` e o volume de dados
+permanecem na VPS e não são copiados para o repositório ou para os logs do Actions.
+
 Para acompanhar os logs:
 
 ```bash

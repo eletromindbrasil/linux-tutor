@@ -1,0 +1,62 @@
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-tutor-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://linux.eletromind.cloud
+
+    steps:
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/linux_tutor_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/linux_tutor_deploy ~/.ssh/known_hosts
+
+      - name: Deploy exact commit
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -i ~/.ssh/linux_tutor_deploy \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            "$VPS_USER@$VPS_HOST" "bash -s -- '$GITHUB_SHA'" <<'REMOTE'
+          set -euo pipefail
+          release_sha="$1"
+          deploy_directory=/opt/linux-tutor
+
+          if [[ ! -d "$deploy_directory/.git" ]]; then
+            git clone https://github.com/eletromindbrasil/linux-tutor.git "$deploy_directory"
+          fi
+
+          cd "$deploy_directory"
+          git fetch --depth=1 origin "$release_sha"
+          git checkout --detach --force "$release_sha"
+          ./scripts/deploy-production.sh
+          REMOTE
+
+      - name: Verify public endpoint
+        run: |
+          curl --retry 30 --retry-delay 2 --retry-all-errors \
+            --fail --show-error --silent \
+            https://linux.eletromind.cloud/api/health

@@ -125,6 +125,7 @@ O aprendizado acontece por prática:
 | SYS-027 | Banco isolado em rede interna e volume Compose | done | serviço sem porta publicada |
 | SYS-028 | Autorização de sessões HTTP e WebSocket por usuário | done | cookie HttpOnly e ownership de sandbox |
 | SYS-029 | Reconexão automática do terminal | done | três tentativas antes de orientar reinício |
+| SYS-030 | Deploy automático em produção | done | GitHub Actions, SSH dedicado, Traefik e smoke pós-deploy |
 
 ### 4.2 Lições implantadas
 
@@ -567,3 +568,4 @@ O serviço `app` deve aparecer como `healthy`.
 | 2026-08-02 | Preparada distribuição pública com documentação portátil, guia de contribuição e licença MIT. |
 | 2026-08-27 | Implantados PostgreSQL isolado, autenticação, troca obrigatória no primeiro login e progresso por usuário. |
 | 2026-08-27 | Reativado e reforçado o terminal com origem compatível com proxy, ownership por usuário, reconexão e limpeza por instância. |
+| 2026-08-27 | Automatizado deploy em `linux.eletromind.cloud` via GitHub Actions e usuário SSH dedicado. |
