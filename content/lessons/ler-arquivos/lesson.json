@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "ler-arquivos",
+  "curriculumId": "M03-L01",
+  "moduleId": "M03",
+  "level": "iniciante",
+  "order": 10,
+  "prerequisites": ["estrutura-linux"],
+  "eyebrow": "Leitura de texto",
+  "title": "Leia arquivos do começo ao fim",
+  "summary": "Escolha entre cat, less, head e tail conforme o tamanho e a parte do arquivo que interessa.",
+  "duration": "9 min",
+  "objective": "Ler um arquivo completo e selecionar suas primeiras e últimas linhas.",
+  "concepts": [
+    "cat é direto para textos curtos; less permite navegar por textos maiores.",
+    "head e tail evitam carregar tudo quando apenas o início ou o fim interessa."
+  ],
+  "examples": [
+    {"command": "cat aviso.txt", "explanation": "Exibe todo o arquivo de uma vez."},
+    {"command": "head -n 3 eventos.log", "explanation": "Mostra somente as três primeiras linhas."},
+    {"command": "tail -n 2 eventos.log", "explanation": "Mostra somente as duas últimas linhas."},
+    {"command": "less eventos.log", "explanation": "Abre uma leitura paginada; pressione q para sair."}
+  ],
+  "taskIntro": "Inspecione o guia e o registro de eventos usando a ferramenta adequada para cada pergunta.",
+  "steps": [
+    "Leia guia.txt inteiro com cat.",
+    "Mostre as três primeiras linhas de eventos.log.",
+    "Mostre as duas últimas linhas de eventos.log.",
+    "Abra eventos.log com less e saia com q."
+  ],
+  "hints": [
+    "cat recebe o nome do arquivo como argumento.",
+    "A opção -n define quantas linhas head ou tail mostra.",
+    "Use head para o começo e tail para o fim.",
+    "Dentro de less, a tecla q encerra a leitura."
+  ],
+  "startingDirectory": "/home/aluno/leitura",
+  "setupCommand": "mkdir -p /home/aluno/leitura && printf 'Leia com calma antes de agir.\\n' > /home/aluno/leitura/guia.txt && seq 1 12 | sed 's/^/evento-/' > /home/aluno/leitura/eventos.log",
+  "checks": [
+    {"id": "read-guide", "label": "Você leu o guia completo", "command": "grep -Eq '^[[:space:]]*cat[[:space:]]+guia\\.txt[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute cat guia.txt."},
+    {"id": "read-start", "label": "Você selecionou as três primeiras linhas", "command": "grep -Eq '^[[:space:]]*head[[:space:]]+-n[[:space:]]+3[[:space:]]+eventos\\.log[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute head -n 3 eventos.log."},
+    {"id": "read-end", "label": "Você selecionou as duas últimas linhas", "command": "grep -Eq '^[[:space:]]*tail[[:space:]]+-n[[:space:]]+2[[:space:]]+eventos\\.log[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute tail -n 2 eventos.log."},
+    {"id": "used-less", "label": "Você abriu o registro com less", "command": "grep -Eq '^[[:space:]]*less([[:space:]]+-F[[:space:]]+-X)?[[:space:]]+eventos\\.log[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Abra eventos.log com less e pressione q para sair."}
+  ],
+  "smokeCommands": ["cat guia.txt", "head -n 3 eventos.log", "tail -n 2 eventos.log", "less -F -X eventos.log"]
+}

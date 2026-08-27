@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "permissoes-rwx",
+  "curriculumId": "M06-L02",
+  "moduleId": "M06",
+  "level": "iniciante",
+  "order": 26,
+  "prerequisites": ["identidade-usuario"],
+  "eyebrow": "Controle de acesso",
+  "title": "Leia permissões de arquivos e diretórios",
+  "summary": "Interprete r, w e x para dono, grupo e outros e entenda por que diretórios são diferentes.",
+  "duration": "11 min",
+  "objective": "Interpretar uma listagem longa e testar leitura, escrita e execução sem alterar permissões.",
+  "concepts": [
+    "Os nove caracteres de permissão são divididos em dono, grupo e outros.",
+    "Em arquivos x permite executar; em diretórios x permite atravessar e acessar nomes internos."
+  ],
+  "examples": [
+    {"command": "ls -l arquivo", "explanation": "Mostra tipo, permissões, dono e grupo."},
+    {"command": "test -r arquivo && echo legivel", "explanation": "Verifica leitura para a identidade atual."},
+    {"command": "test -x script.sh && echo executavel", "explanation": "Verifica permissão de execução efetiva."}
+  ],
+  "taskIntro": "Inspecione três objetos com modos diferentes e teste o que a identidade aluno pode fazer.",
+  "steps": [
+    "Execute ls -ld leitura.txt executar.sh compartilhado.",
+    "Teste leitura.txt com test -r.",
+    "Teste executar.sh com test -x.",
+    "Teste compartilhado com test -d e test -x."
+  ],
+  "hints": [
+    "Use -d em ls para mostrar o próprio diretório.",
+    "test não imprime nada; combine com && echo sim.",
+    "O dono aluno pode ler leitura.txt.",
+    "Para entrar em um diretório, a permissão x é essencial."
+  ],
+  "startingDirectory": "/home/aluno/permissoes",
+  "setupCommand": "mkdir -p /home/aluno/permissoes/compartilhado && printf 'conteudo\\n' > /home/aluno/permissoes/leitura.txt && printf '#!/bin/sh\\necho executado\\n' > /home/aluno/permissoes/executar.sh && chmod 640 /home/aluno/permissoes/leitura.txt && chmod 750 /home/aluno/permissoes/executar.sh /home/aluno/permissoes/compartilhado",
+  "checks": [
+    {"id": "permissions-listed", "label": "Você inspecionou modos, dono e grupo", "command": "grep -Eq 'ls[[:space:]]+-ld[[:space:]]+leitura\\.txt[[:space:]]+executar\\.sh[[:space:]]+compartilhado' /home/aluno/.lesson_history", "failureMessage": "Execute ls -ld leitura.txt executar.sh compartilhado."},
+    {"id": "read-tested", "label": "Você testou a permissão de leitura", "command": "grep -Eq 'test[[:space:]]+-r[[:space:]]+leitura\\.txt' /home/aluno/.lesson_history", "failureMessage": "Use test -r leitura.txt && echo legivel."},
+    {"id": "execute-tested", "label": "Você testou a permissão de execução", "command": "grep -Eq 'test[[:space:]]+-x[[:space:]]+executar\\.sh' /home/aluno/.lesson_history", "failureMessage": "Use test -x executar.sh && echo executavel."},
+    {"id": "directory-tested", "label": "Você reconheceu e testou o diretório", "command": "grep -Eq 'test[[:space:]]+-d[[:space:]]+compartilhado.*&&.*test[[:space:]]+-x[[:space:]]+compartilhado' /home/aluno/.lesson_history", "failureMessage": "Teste compartilhado com test -d e test -x."}
+  ],
+  "smokeCommands": ["ls -ld leitura.txt executar.sh compartilhado", "test -r leitura.txt && echo legivel", "test -x executar.sh && echo executavel", "test -d compartilhado && test -x compartilhado && echo acessivel"]
+}

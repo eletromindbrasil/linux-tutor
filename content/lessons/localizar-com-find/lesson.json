@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "localizar-com-find",
+  "curriculumId": "M05-L01",
+  "moduleId": "M05",
+  "level": "iniciante",
+  "order": 20,
+  "prerequisites": ["codigos-de-saida"],
+  "eyebrow": "Busca no filesystem",
+  "title": "Localize arquivos com find",
+  "summary": "Pesquise a árvore atual por nome, tipo, tamanho e horário sem depender de um índice.",
+  "duration": "12 min",
+  "objective": "Construir buscas find previsíveis e salvar uma seleção de arquivos.",
+  "concepts": [
+    "find percorre diretórios em tempo real e combina critérios da esquerda para a direita.",
+    "-type restringe o tipo, -name compara nomes e -size filtra por tamanho."
+  ],
+  "examples": [
+    {"command": "find . -type f -name '*.log'", "explanation": "Encontra arquivos cujo nome termina em .log."},
+    {"command": "find . -type d -name cache", "explanation": "Procura somente diretórios chamados cache."},
+    {"command": "find . -type f -size +1k", "explanation": "Seleciona arquivos maiores que 1 KiB."}
+  ],
+  "taskIntro": "Investigue a árvore projetos e gere uma lista ordenada dos arquivos de configuração.",
+  "steps": [
+    "Encontre todos os arquivos .conf abaixo do diretório atual.",
+    "Encontre diretórios chamados cache.",
+    "Encontre arquivos maiores que 1 KiB.",
+    "Grave os caminhos .conf ordenados em configuracoes.txt."
+  ],
+  "hints": [
+    "Use . como ponto inicial.",
+    "Coloque padrões com * entre aspas.",
+    "Diretórios usam -type d e arquivos usam -type f.",
+    "Passe a busca de .conf por sort antes do redirecionamento."
+  ],
+  "startingDirectory": "/home/aluno/procura",
+  "setupCommand": "mkdir -p /home/aluno/procura/{app/cache,api/cache,docs} && printf 'modo=dev\\n' > /home/aluno/procura/app/app.conf && printf 'porta=9000\\n' > /home/aluno/procura/api/api.conf && printf 'texto\\n' > /home/aluno/procura/docs/leia.txt && dd if=/dev/zero of=/home/aluno/procura/app/cache/grande.bin bs=1024 count=2 status=none",
+  "checks": [
+    {"id": "name-search", "label": "Você buscou configurações por nome", "command": "grep -Eq \"find[[:space:]]+\\.[[:space:]]+-type[[:space:]]+f[[:space:]]+-name[[:space:]]+['\\\"]?[*]\\.conf\" /home/aluno/.lesson_history", "failureMessage": "Execute find . -type f -name '*.conf'."},
+    {"id": "directory-search", "label": "Você restringiu a busca a diretórios", "command": "grep -Eq 'find[[:space:]]+\\.[[:space:]]+-type[[:space:]]+d[[:space:]]+-name[[:space:]]+cache' /home/aluno/.lesson_history", "failureMessage": "Execute find . -type d -name cache."},
+    {"id": "size-search", "label": "Você pesquisou por tamanho", "command": "grep -Eq 'find[[:space:]]+\\.[[:space:]]+-type[[:space:]]+f[[:space:]]+-size[[:space:]]+[+]1k' /home/aluno/.lesson_history", "failureMessage": "Execute find . -type f -size +1k."},
+    {"id": "config-list", "label": "A lista ordenada contém as duas configurações", "command": "printf './api/api.conf\\n./app/app.conf\\n' | cmp -s - /home/aluno/procura/configuracoes.txt", "failureMessage": "Grave os dois caminhos .conf, ordenados, em configuracoes.txt."}
+  ],
+  "smokeCommands": ["find . -type f -name '*.conf'", "find . -type d -name cache", "find . -type f -size +1k", "find . -type f -name '*.conf' | sort > configuracoes.txt"]
+}

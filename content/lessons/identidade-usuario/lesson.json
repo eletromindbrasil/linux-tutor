@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "identidade-usuario",
+  "curriculumId": "M06-L01",
+  "moduleId": "M06",
+  "level": "iniciante",
+  "order": 25,
+  "prerequisites": ["contar-ordenar-unicos"],
+  "eyebrow": "Usuários e grupos",
+  "title": "Descubra sua identidade no Linux",
+  "summary": "Relacione nome de login, UID, grupo principal e grupos suplementares.",
+  "duration": "8 min",
+  "objective": "Usar whoami, id e groups para interpretar a identidade efetiva do processo.",
+  "concepts": [
+    "O kernel usa identificadores numéricos de usuário e grupo para aplicar permissões.",
+    "Um usuário tem um grupo principal e pode participar de grupos suplementares."
+  ],
+  "examples": [
+    {"command": "whoami", "explanation": "Mostra o nome do usuário efetivo atual."},
+    {"command": "id", "explanation": "Mostra UID, GID e todos os grupos."},
+    {"command": "groups", "explanation": "Lista os nomes dos grupos da identidade atual."}
+  ],
+  "taskIntro": "Faça um inventário da identidade do laboratório e registre um resumo verificável.",
+  "steps": [
+    "Execute whoami.",
+    "Execute id.",
+    "Execute groups.",
+    "Grave a saída de id em identidade.txt e leia o arquivo."
+  ],
+  "hints": [
+    "O usuário do laboratório se chama aluno.",
+    "UID e GID aparecem na saída de id.",
+    "Procure o grupo suplementar laboratorio.",
+    "Use id > identidade.txt para guardar o inventário."
+  ],
+  "startingDirectory": "/home/aluno/identidade",
+  "setupCommand": "mkdir -p /home/aluno/identidade",
+  "checks": [
+    {"id": "whoami-used", "label": "Você confirmou o usuário efetivo", "command": "grep -Eq '^[[:space:]]*whoami[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute whoami."},
+    {"id": "id-used", "label": "Você inspecionou UID, GID e grupos", "command": "grep -Eq '^[[:space:]]*id([[:space:]]*>[[:space:]]*identidade\\.txt)?[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute id para ver os identificadores."},
+    {"id": "groups-used", "label": "Você listou os grupos", "command": "grep -Eq '^[[:space:]]*groups[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute groups."},
+    {"id": "identity-record", "label": "O inventário registra aluno e laboratorio", "command": "test -s /home/aluno/identidade/identidade.txt && grep -q 'aluno' /home/aluno/identidade/identidade.txt && grep -q 'laboratorio' /home/aluno/identidade/identidade.txt", "failureMessage": "Grave a saída de id em identidade.txt."}
+  ],
+  "smokeCommands": ["whoami", "id", "groups", "id > identidade.txt", "cat identidade.txt"]
+}

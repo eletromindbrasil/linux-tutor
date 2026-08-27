@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "regex-basica",
+  "curriculumId": "M05-L04",
+  "moduleId": "M05",
+  "level": "iniciante",
+  "order": 23,
+  "prerequisites": ["buscar-com-grep"],
+  "eyebrow": "Padrões de texto",
+  "title": "Expresse padrões com regex",
+  "summary": "Use âncoras, classes de caracteres e repetição para selecionar formatos em vez de palavras fixas.",
+  "duration": "12 min",
+  "objective": "Construir expressões regulares básicas com grep -E e validar dados simples.",
+  "concepts": [
+    "^ ancora o início e $ ancora o fim; juntos descrevem a linha inteira.",
+    "Classes como [0-9] e quantificadores como + descrevem conjuntos e repetições."
+  ],
+  "examples": [
+    {"command": "grep -E '^[0-9]+$' dados.txt", "explanation": "Seleciona linhas formadas apenas por dígitos."},
+    {"command": "grep -E '^srv-[a-z]+$' hosts.txt", "explanation": "Seleciona nomes com prefixo e letras minúsculas."},
+    {"command": "grep -E '^(INFO|WARN):' log.txt", "explanation": "Aceita uma de duas alternativas no início."}
+  ],
+  "taskIntro": "Separe códigos, hosts e mensagens válidas de um arquivo misturado.",
+  "steps": [
+    "Extraia linhas somente numéricas para codigos.txt.",
+    "Extraia nomes no formato srv-letras para hosts.txt.",
+    "Extraia linhas iniciadas por INFO: ou WARN: para eventos.txt.",
+    "Conte cada resultado."
+  ],
+  "hints": [
+    "Use grep -E para os operadores +, | e parênteses.",
+    "O padrão numérico é ^[0-9]+$.",
+    "O host começa com ^srv- e termina após letras minúsculas.",
+    "Agrupe INFO e WARN entre parênteses separados por |."
+  ],
+  "startingDirectory": "/home/aluno/regex",
+  "setupCommand": "mkdir -p /home/aluno/regex && printf '12345\\n12A45\\nsrv-web\\nsrv-02\\nINFO: pronto\\nWARN: lento\\nERROR: falhou\\n' > /home/aluno/regex/dados.txt",
+  "checks": [
+    {"id": "numeric-lines", "label": "Você isolou o código numérico", "command": "printf '12345\\n' | cmp -s - /home/aluno/regex/codigos.txt", "failureMessage": "codigos.txt deve conter somente 12345."},
+    {"id": "host-lines", "label": "Você isolou o host no formato pedido", "command": "printf 'srv-web\\n' | cmp -s - /home/aluno/regex/hosts.txt", "failureMessage": "hosts.txt deve conter somente srv-web."},
+    {"id": "event-lines", "label": "Você selecionou INFO e WARN", "command": "printf 'INFO: pronto\\nWARN: lento\\n' | cmp -s - /home/aluno/regex/eventos.txt", "failureMessage": "eventos.txt deve conter as linhas INFO e WARN, mas não ERROR."},
+    {"id": "extended-regex-used", "label": "Você praticou expressões estendidas", "command": "test \"$(grep -Ec '^[[:space:]]*grep[[:space:]]+-E' /home/aluno/.lesson_history)\" -ge 3", "failureMessage": "Use grep -E nas três extrações."}
+  ],
+  "smokeCommands": ["grep -E '^[0-9]+$' dados.txt > codigos.txt", "grep -E '^srv-[a-z]+$' dados.txt > hosts.txt", "grep -E '^(INFO|WARN):' dados.txt > eventos.txt", "wc -l codigos.txt hosts.txt eventos.txt"]
+}

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "tipos-encoding",
+  "curriculumId": "M03-L04",
+  "moduleId": "M03",
+  "level": "iniciante",
+  "order": 13,
+  "prerequisites": ["fundamentos-vim"],
+  "eyebrow": "Formatos de arquivo",
+  "title": "Reconheça tipo, encoding e fim de linha",
+  "summary": "Investigue arquivos pelo conteúdo e diferencie texto Unix de texto com finais de linha CRLF.",
+  "duration": "10 min",
+  "objective": "Usar file e uma inspeção hexadecimal para reconhecer formatos e normalizar CRLF.",
+  "concepts": [
+    "A extensão é apenas parte do nome; file examina o conteúdo para identificar o formato.",
+    "Linux usa LF como fim de linha, enquanto arquivos Windows frequentemente usam CRLF."
+  ],
+  "examples": [
+    {"command": "file exemplo.dat", "explanation": "Identifica o tipo provável pelo conteúdo."},
+    {"command": "od -An -t x1 texto.txt", "explanation": "Mostra bytes; 0d 0a representa CRLF."},
+    {"command": "tr -d '\\r' < windows.txt > unix.txt", "explanation": "Remove os bytes CR e mantém finais LF."}
+  ],
+  "taskIntro": "Identifique três arquivos e produza uma cópia Unix do texto que veio do Windows.",
+  "steps": [
+    "Execute file em linux.txt, windows.txt e programa.",
+    "Inspecione os bytes de windows.txt com od.",
+    "Remova os caracteres CR e grave o resultado em convertido.txt.",
+    "Confirme o novo formato com file convertido.txt."
+  ],
+  "hints": [
+    "file aceita vários nomes na mesma chamada.",
+    "Procure a sequência hexadecimal 0d 0a.",
+    "O caractere CR pode ser representado por \\r.",
+    "Use redirecionamentos para não alterar o original."
+  ],
+  "startingDirectory": "/home/aluno/formatos",
+  "setupCommand": "mkdir -p /home/aluno/formatos && printf 'linha um\\nlinha dois\\n' > /home/aluno/formatos/linux.txt && printf 'linha um\\r\\nlinha dois\\r\\n' > /home/aluno/formatos/windows.txt && printf '#!/bin/sh\\necho pronto\\n' > /home/aluno/formatos/programa && chmod +x /home/aluno/formatos/programa",
+  "checks": [
+    {"id": "inspected-types", "label": "Você identificou os arquivos com file", "command": "grep -Eq '^[[:space:]]*file[[:space:]]+linux\\.txt[[:space:]]+windows\\.txt[[:space:]]+programa[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute file linux.txt windows.txt programa."},
+    {"id": "inspected-bytes", "label": "Você inspecionou os bytes do arquivo CRLF", "command": "grep -Eq '^[[:space:]]*od[[:space:]]+-An[[:space:]]+-t[[:space:]]+x1[[:space:]]+windows\\.txt[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute od -An -t x1 windows.txt."},
+    {"id": "converted-created", "label": "A cópia convertida foi criada", "command": "test -f /home/aluno/formatos/convertido.txt && ! grep -q \"$(printf '\\r')\" /home/aluno/formatos/convertido.txt && cmp -s /home/aluno/formatos/linux.txt /home/aluno/formatos/convertido.txt", "failureMessage": "Crie convertido.txt sem caracteres CR e preserve windows.txt."},
+    {"id": "original-preserved", "label": "O arquivo CRLF original foi preservado", "command": "grep -q \"$(printf '\\r')\" /home/aluno/formatos/windows.txt", "failureMessage": "windows.txt foi alterado; reinicie a lição e gere uma cópia."}
+  ],
+  "smokeCommands": ["file linux.txt windows.txt programa", "od -An -t x1 windows.txt", "tr -d '\\r' < windows.txt > convertido.txt", "file convertido.txt"]
+}

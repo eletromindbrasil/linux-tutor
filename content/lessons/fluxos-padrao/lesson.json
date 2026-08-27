@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "fluxos-padrao",
+  "curriculumId": "M04-L01",
+  "moduleId": "M04",
+  "level": "iniciante",
+  "order": 15,
+  "prerequisites": ["comparar-arquivos"],
+  "eyebrow": "Entrada e saída",
+  "title": "Conheça os três fluxos padrão",
+  "summary": "Diferencie entrada padrão, saída normal e mensagens de erro antes de redirecioná-las.",
+  "duration": "9 min",
+  "objective": "Produzir e consumir stdin, stdout e stderr de forma consciente.",
+  "concepts": [
+    "stdin fornece dados ao comando; stdout leva o resultado normal e stderr leva diagnósticos.",
+    "Os descritores tradicionais são 0 para stdin, 1 para stdout e 2 para stderr."
+  ],
+  "examples": [
+    {"command": "printf 'entrada\\n' | cat", "explanation": "printf alimenta o stdin de cat."},
+    {"command": "printf 'normal\\n'", "explanation": "A mensagem segue pela saída padrão."},
+    {"command": "printf 'erro\\n' >&2", "explanation": "A mensagem é enviada ao stderr."}
+  ],
+  "taskIntro": "Produza uma mensagem em cada saída e faça cat consumir uma linha pela entrada padrão.",
+  "steps": [
+    "Envie PROCESSADO para stdout com printf.",
+    "Envie ALERTA para stderr usando >&2.",
+    "Passe a palavra entrada para cat por um pipe.",
+    "Execute ./diagnostico.sh e observe os dois fluxos na mesma tela."
+  ],
+  "hints": [
+    "printf 'PROCESSADO\\n' usa stdout por padrão.",
+    ">&2 troca o destino do printf para stderr.",
+    "O caractere | conecta a saída de um comando à entrada de outro.",
+    "O script de diagnóstico já está executável."
+  ],
+  "startingDirectory": "/home/aluno/fluxos",
+  "setupCommand": "mkdir -p /home/aluno/fluxos && printf '#!/bin/sh\\necho RESULTADO\\necho AVISO >&2\\n' > /home/aluno/fluxos/diagnostico.sh && chmod +x /home/aluno/fluxos/diagnostico.sh",
+  "checks": [
+    {"id": "stdout-produced", "label": "Você produziu uma saída normal", "command": "grep -Eq 'printf.*PROCESSADO' /home/aluno/.lesson_history", "failureMessage": "Execute printf 'PROCESSADO\\n'."},
+    {"id": "stderr-produced", "label": "Você enviou uma mensagem ao stderr", "command": "grep -Eq 'printf.*ALERTA.*>&2[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Use printf 'ALERTA\\n' >&2."},
+    {"id": "stdin-consumed", "label": "Você alimentou a entrada padrão de cat", "command": "grep -Eq 'printf.*entrada.*[|][[:space:]]*cat' /home/aluno/.lesson_history", "failureMessage": "Execute printf 'entrada\\n' | cat."},
+    {"id": "diagnostic-run", "label": "Você observou o script com dois fluxos", "command": "grep -Eq '^[[:space:]]*\\./diagnostico\\.sh[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute ./diagnostico.sh."}
+  ],
+  "smokeCommands": ["printf 'PROCESSADO\\n'", "printf 'ALERTA\\n' >&2", "printf 'entrada\\n' | cat", "./diagnostico.sh"]
+}

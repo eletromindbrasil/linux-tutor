@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "dono-e-grupo",
+  "curriculumId": "M06-L04",
+  "moduleId": "M06",
+  "level": "iniciante",
+  "order": 28,
+  "prerequisites": ["alterar-permissoes"],
+  "eyebrow": "Propriedade de arquivos",
+  "title": "Ajuste dono e grupo com segurança",
+  "summary": "Diferencie ownership de permissões e delegue arquivos a um grupo do qual você participa.",
+  "duration": "10 min",
+  "objective": "Usar chgrp e chown dentro dos limites de um usuário não privilegiado.",
+  "concepts": [
+    "Todo arquivo possui um UID dono e um GID grupo, independentemente do modo rwx.",
+    "Um usuário comum pode escolher apenas grupos dos quais participa e não pode transferir arquivos a outro usuário."
+  ],
+  "examples": [
+    {"command": "chgrp laboratorio relatorio.txt", "explanation": "Muda o grupo para um grupo da identidade atual."},
+    {"command": "chown aluno:laboratorio notas.txt", "explanation": "Mantém o mesmo dono e escolhe um grupo permitido."},
+    {"command": "stat -c '%U:%G %n' arquivo", "explanation": "Mostra dono e grupo por nome."}
+  ],
+  "taskIntro": "Prepare dois arquivos para colaboração pelo grupo laboratorio sem elevar privilégios.",
+  "steps": [
+    "Confirme com id que aluno participa de laboratorio.",
+    "Use chgrp laboratorio relatorio.txt.",
+    "Use chown aluno:laboratorio notas.txt.",
+    "Confira dono e grupo dos dois arquivos com stat."
+  ],
+  "hints": [
+    "O grupo laboratorio já foi criado na imagem.",
+    "chgrp recebe grupo e arquivo.",
+    "Em chown, separe dono e grupo com :.",
+    "Não tente trocar o dono para root ou outro usuário."
+  ],
+  "startingDirectory": "/home/aluno/ownership",
+  "setupCommand": "mkdir -p /home/aluno/ownership && printf 'relatorio\\n' > /home/aluno/ownership/relatorio.txt && printf 'notas\\n' > /home/aluno/ownership/notas.txt",
+  "checks": [
+    {"id": "group-membership", "label": "Você confirmou a participação no grupo", "command": "grep -Eq '^[[:space:]]*id[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute id e localize o grupo laboratorio."},
+    {"id": "report-group", "label": "relatorio.txt pertence ao grupo laboratorio", "command": "test \"$(stat -c %U:%G /home/aluno/ownership/relatorio.txt)\" = aluno:laboratorio", "failureMessage": "Use chgrp laboratorio relatorio.txt."},
+    {"id": "notes-owner-group", "label": "notas.txt mantém aluno e usa laboratorio", "command": "test \"$(stat -c %U:%G /home/aluno/ownership/notas.txt)\" = aluno:laboratorio", "failureMessage": "Use chown aluno:laboratorio notas.txt."},
+    {"id": "ownership-commands", "label": "Você praticou chgrp e chown", "command": "grep -Eq 'chgrp[[:space:]]+laboratorio[[:space:]]+relatorio\\.txt' /home/aluno/.lesson_history && grep -Eq 'chown[[:space:]]+aluno:laboratorio[[:space:]]+notas\\.txt' /home/aluno/.lesson_history", "failureMessage": "Aplique chgrp e chown nos arquivos indicados."}
+  ],
+  "smokeCommands": ["id", "chgrp laboratorio relatorio.txt", "chown aluno:laboratorio notas.txt", "stat -c '%U:%G %n' relatorio.txt notas.txt"]
+}

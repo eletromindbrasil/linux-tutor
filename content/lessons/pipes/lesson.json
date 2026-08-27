@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "pipes",
+  "curriculumId": "M04-L03",
+  "moduleId": "M04",
+  "level": "iniciante",
+  "order": 17,
+  "prerequisites": ["redirecionamentos"],
+  "eyebrow": "Composição de comandos",
+  "title": "Monte pipelines pequenos",
+  "summary": "Conecte comandos simples para filtrar, ordenar e contar dados sem arquivos temporários.",
+  "duration": "10 min",
+  "objective": "Compor pipelines de dois e três estágios e verificar o resultado final.",
+  "concepts": [
+    "O pipe conecta stdout do comando à esquerda ao stdin do comando à direita.",
+    "Cada estágio deve realizar uma transformação pequena e compreensível."
+  ],
+  "examples": [
+    {"command": "cat acessos.log | grep OK", "explanation": "Mantém somente linhas que contêm OK."},
+    {"command": "cat nomes.txt | sort | uniq", "explanation": "Ordena e elimina valores repetidos adjacentes."}
+  ],
+  "taskIntro": "Extraia os nomes de serviços saudáveis e gere uma lista ordenada sem repetições.",
+  "steps": [
+    "Use cat servicos.log | grep OK para filtrar linhas saudáveis.",
+    "Acrescente cut -d: -f1 para manter apenas o nome.",
+    "Acrescente sort | uniq e redirecione o resultado para saudaveis.txt.",
+    "Conte o resultado com cat saudaveis.txt | wc -l."
+  ],
+  "hints": [
+    "Comece com dois comandos e confira a saída.",
+    "O separador entre nome e estado é :.",
+    "sort deve vir antes de uniq.",
+    "O arquivo final deve conter api, banco e web."
+  ],
+  "startingDirectory": "/home/aluno/pipelines",
+  "setupCommand": "mkdir -p /home/aluno/pipelines && printf 'web:OK\\napi:FALHA\\nbanco:OK\\napi:OK\\nweb:OK\\n' > /home/aluno/pipelines/servicos.log",
+  "checks": [
+    {"id": "healthy-list", "label": "A lista saudável está ordenada e sem repetições", "command": "printf 'api\\nbanco\\nweb\\n' | cmp -s - /home/aluno/pipelines/saudaveis.txt", "failureMessage": "saudaveis.txt deve conter api, banco e web, em ordem e uma vez cada."},
+    {"id": "grep-pipe", "label": "Você filtrou com grep dentro de um pipe", "command": "grep -Eq 'cat[[:space:]]+servicos\\.log[[:space:]]*[|][[:space:]]*grep[[:space:]]+OK' /home/aluno/.lesson_history", "failureMessage": "Comece com cat servicos.log | grep OK."},
+    {"id": "composed-pipeline", "label": "Você compôs filtro, recorte, ordem e unicidade", "command": "grep -Eq 'grep[[:space:]]+OK.*[|].*cut[[:space:]]+-d:.*[|].*sort.*[|].*uniq' /home/aluno/.lesson_history", "failureMessage": "Conecte grep, cut, sort e uniq na ordem indicada."},
+    {"id": "counted-pipeline", "label": "Você contou a lista por um pipe", "command": "grep -Eq 'cat[[:space:]]+saudaveis\\.txt[[:space:]]*[|][[:space:]]*wc[[:space:]]+-l' /home/aluno/.lesson_history", "failureMessage": "Execute cat saudaveis.txt | wc -l."}
+  ],
+  "smokeCommands": ["cat servicos.log | grep OK", "cat servicos.log | grep OK | cut -d: -f1 | sort | uniq > saudaveis.txt", "cat saudaveis.txt | wc -l"]
+}

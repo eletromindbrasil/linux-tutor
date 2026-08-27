@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "comparar-arquivos",
+  "curriculumId": "M03-L05",
+  "moduleId": "M03",
+  "level": "iniciante",
+  "order": 14,
+  "prerequisites": ["tipos-encoding"],
+  "eyebrow": "Comparação de texto",
+  "title": "Encontre diferenças entre arquivos",
+  "summary": "Use diff para entender mudanças linha a linha e cmp para uma resposta rápida sobre igualdade.",
+  "duration": "9 min",
+  "objective": "Comparar duas versões, registrar um diff unificado e confirmar arquivos iguais.",
+  "concepts": [
+    "diff descreve linhas removidas e adicionadas; a opção -u inclui contexto legível.",
+    "cmp -s não imprime detalhes e informa igualdade pelo código de saída."
+  ],
+  "examples": [
+    {"command": "diff -u antes.conf depois.conf", "explanation": "Mostra um patch unificado entre versões."},
+    {"command": "cmp -s copia-a copia-b", "explanation": "Retorna sucesso somente quando os bytes são iguais."}
+  ],
+  "taskIntro": "Analise duas configurações e guarde um relatório reproduzível das alterações.",
+  "steps": [
+    "Compare versao-a.conf e versao-b.conf com diff -u.",
+    "Redirecione o diff para diferencas.txt, aceitando que diff retorna 1 quando encontra mudanças.",
+    "Use cmp -s em versao-a.conf e copia-a.conf.",
+    "Leia diferencas.txt."
+  ],
+  "hints": [
+    "Comece com diff -u versao-a.conf versao-b.conf.",
+    "Use > diferencas.txt e depois || true para continuar após diferenças.",
+    "cmp -s é silencioso quando os arquivos são iguais.",
+    "cat permite revisar o relatório salvo."
+  ],
+  "startingDirectory": "/home/aluno/comparacao",
+  "setupCommand": "mkdir -p /home/aluno/comparacao && printf 'porta=8080\\nmodo=teste\\n' > /home/aluno/comparacao/versao-a.conf && printf 'porta=8080\\nmodo=producao\\n' > /home/aluno/comparacao/versao-b.conf && cp /home/aluno/comparacao/versao-a.conf /home/aluno/comparacao/copia-a.conf",
+  "checks": [
+    {"id": "diff-used", "label": "Você comparou as versões com diff -u", "command": "grep -Eq '^[[:space:]]*diff[[:space:]]+-u[[:space:]]+versao-a\\.conf[[:space:]]+versao-b\\.conf' /home/aluno/.lesson_history", "failureMessage": "Use diff -u versao-a.conf versao-b.conf."},
+    {"id": "report-created", "label": "O relatório contém a mudança de modo", "command": "test -f /home/aluno/comparacao/diferencas.txt && grep -Fxq -- '-modo=teste' /home/aluno/comparacao/diferencas.txt && grep -Fxq -- '+modo=producao' /home/aluno/comparacao/diferencas.txt", "failureMessage": "Grave a saída do diff unificado em diferencas.txt."},
+    {"id": "cmp-used", "label": "Você confirmou as cópias com cmp -s", "command": "grep -Eq '^[[:space:]]*cmp[[:space:]]+-s[[:space:]]+versao-a\\.conf[[:space:]]+copia-a\\.conf' /home/aluno/.lesson_history", "failureMessage": "Execute cmp -s versao-a.conf copia-a.conf."},
+    {"id": "report-read", "label": "Você leu o relatório de diferenças", "command": "grep -Eq '^[[:space:]]*cat[[:space:]]+diferencas\\.txt[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute cat diferencas.txt."}
+  ],
+  "smokeCommands": ["diff -u versao-a.conf versao-b.conf > diferencas.txt || true", "cmp -s versao-a.conf copia-a.conf", "cat diferencas.txt"]
+}

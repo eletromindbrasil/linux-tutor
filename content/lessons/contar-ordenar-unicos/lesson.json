@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "contar-ordenar-unicos",
+  "curriculumId": "M05-L05",
+  "moduleId": "M05",
+  "level": "iniciante",
+  "order": 24,
+  "prerequisites": ["regex-basica"],
+  "eyebrow": "Resumo de dados",
+  "title": "Conte, ordene e elimine duplicados",
+  "summary": "Transforme uma lista bruta em dados ordenados e em uma frequência de ocorrências.",
+  "duration": "10 min",
+  "objective": "Combinar wc, sort e uniq para responder perguntas sobre uma lista textual.",
+  "concepts": [
+    "wc -l conta linhas e sort ordena segundo a locale atual.",
+    "uniq compara linhas adjacentes; por isso normalmente recebe dados já ordenados."
+  ],
+  "examples": [
+    {"command": "wc -l cidades.txt", "explanation": "Conta quantas linhas existem no arquivo."},
+    {"command": "sort cidades.txt | uniq", "explanation": "Produz valores distintos em ordem."},
+    {"command": "sort cidades.txt | uniq -c", "explanation": "Prefixa cada valor com sua frequência."}
+  ],
+  "taskIntro": "Resuma uma lista de serviços e produza versões ordenada, única e com frequências.",
+  "steps": [
+    "Conte as linhas de servicos.txt com wc -l.",
+    "Ordene a lista em ordenados.txt.",
+    "Elimine duplicados de ordenados.txt em unicos.txt.",
+    "Gere frequencias.txt com sort | uniq -c."
+  ],
+  "hints": [
+    "Há seis linhas no arquivo inicial.",
+    "Use sort servicos.txt > ordenados.txt.",
+    "uniq funciona corretamente porque ordenados.txt já agrupa iguais.",
+    "Para frequências, conecte sort servicos.txt a uniq -c."
+  ],
+  "startingDirectory": "/home/aluno/resumo",
+  "setupCommand": "mkdir -p /home/aluno/resumo && printf 'web\\napi\\nweb\\nbanco\\napi\\nweb\\n' > /home/aluno/resumo/servicos.txt",
+  "checks": [
+    {"id": "line-count", "label": "Você contou as linhas com wc", "command": "grep -Eq '^[[:space:]]*wc[[:space:]]+-l[[:space:]]+servicos\\.txt[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute wc -l servicos.txt."},
+    {"id": "sorted-list", "label": "A lista ordenada preserva todos os itens", "command": "printf 'api\\napi\\nbanco\\nweb\\nweb\\nweb\\n' | cmp -s - /home/aluno/resumo/ordenados.txt", "failureMessage": "Use sort para gerar ordenados.txt sem eliminar itens."},
+    {"id": "unique-list", "label": "A lista única contém três serviços", "command": "printf 'api\\nbanco\\nweb\\n' | cmp -s - /home/aluno/resumo/unicos.txt", "failureMessage": "Use uniq sobre ordenados.txt para gerar unicos.txt."},
+    {"id": "frequencies", "label": "As frequências estão corretas", "command": "sed 's/^[[:space:]]*//' /home/aluno/resumo/frequencias.txt | grep -Fxq '2 api' && sed 's/^[[:space:]]*//' /home/aluno/resumo/frequencias.txt | grep -Fxq '1 banco' && sed 's/^[[:space:]]*//' /home/aluno/resumo/frequencias.txt | grep -Fxq '3 web'", "failureMessage": "frequencias.txt deve registrar api=2, banco=1 e web=3."}
+  ],
+  "smokeCommands": ["wc -l servicos.txt", "sort servicos.txt > ordenados.txt", "uniq ordenados.txt > unicos.txt", "sort servicos.txt | uniq -c > frequencias.txt", "cat frequencias.txt"]
+}

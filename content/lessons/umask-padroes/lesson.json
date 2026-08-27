@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "umask-padroes",
+  "curriculumId": "M06-L05",
+  "moduleId": "M06",
+  "level": "iniciante",
+  "order": 29,
+  "prerequisites": ["dono-e-grupo"],
+  "eyebrow": "Permissões padrão",
+  "title": "Defina padrões seguros com umask",
+  "summary": "Veja como a máscara do shell remove permissões na criação de novos arquivos e diretórios.",
+  "duration": "11 min",
+  "objective": "Prever e comprovar os modos gerados por umask 027 e umask 002.",
+  "concepts": [
+    "Arquivos partem normalmente de 666 e diretórios de 777; umask remove bits desses modos.",
+    "A máscara pertence ao processo do shell e afeta apenas objetos criados depois da mudança."
+  ],
+  "examples": [
+    {"command": "umask 027", "explanation": "Novos arquivos tendem a 640 e diretórios a 750."},
+    {"command": "umask 002", "explanation": "Permite escrita pelo grupo em novos objetos colaborativos."},
+    {"command": "stat -c '%a %n' arquivo pasta", "explanation": "Confirma os modos realmente aplicados."}
+  ],
+  "taskIntro": "Crie objetos privados e colaborativos sob duas máscaras e compare os resultados.",
+  "steps": [
+    "Defina umask 027.",
+    "Crie privado.txt e o diretório privado-dir.",
+    "Defina umask 002 e crie colaborativo.txt.",
+    "Confira os três modos com stat."
+  ],
+  "hints": [
+    "Execute umask 027 no shell atual.",
+    "Use touch para o arquivo e mkdir para o diretório.",
+    "Depois mude para umask 002 antes do arquivo colaborativo.",
+    "Os modos esperados são 640, 750 e 664."
+  ],
+  "startingDirectory": "/home/aluno/umask-lab",
+  "setupCommand": "mkdir -p /home/aluno/umask-lab",
+  "checks": [
+    {"id": "private-file-mode", "label": "O arquivo privado foi criado como 640", "command": "test \"$(stat -c %a /home/aluno/umask-lab/privado.txt)\" = 640", "failureMessage": "Defina umask 027 antes de criar privado.txt."},
+    {"id": "private-directory-mode", "label": "O diretório privado foi criado como 750", "command": "test \"$(stat -c %a /home/aluno/umask-lab/privado-dir)\" = 750", "failureMessage": "Crie privado-dir sob umask 027."},
+    {"id": "collaborative-file-mode", "label": "O arquivo colaborativo foi criado como 664", "command": "test \"$(stat -c %a /home/aluno/umask-lab/colaborativo.txt)\" = 664", "failureMessage": "Defina umask 002 antes de criar colaborativo.txt."},
+    {"id": "masks-practiced", "label": "Você praticou as duas máscaras", "command": "grep -Eq '^[[:space:]]*umask[[:space:]]+027[[:space:]]*$' /home/aluno/.lesson_history && grep -Eq '^[[:space:]]*umask[[:space:]]+002[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute umask 027 e depois umask 002 no mesmo terminal."}
+  ],
+  "smokeCommands": ["umask 027", "touch privado.txt", "mkdir privado-dir", "umask 002", "touch colaborativo.txt", "stat -c '%a %n' privado.txt privado-dir colaborativo.txt"]
+}

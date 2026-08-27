@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "buscar-com-grep",
+  "curriculumId": "M05-L03",
+  "moduleId": "M05",
+  "level": "iniciante",
+  "order": 22,
+  "prerequisites": ["localizar-com-locate"],
+  "eyebrow": "Busca em conteúdo",
+  "title": "Encontre texto com grep",
+  "summary": "Busque palavras em um ou vários arquivos, ignore maiúsculas e mostre contexto útil.",
+  "duration": "11 min",
+  "objective": "Usar grep com -i, -n, -r e -l para investigar conteúdo textual.",
+  "concepts": [
+    "grep seleciona linhas que correspondem a um padrão de texto.",
+    "Opções podem ignorar maiúsculas, numerar linhas, percorrer diretórios ou listar só arquivos."
+  ],
+  "examples": [
+    {"command": "grep -in erro app.log", "explanation": "Ignora caixa e mostra números de linha."},
+    {"command": "grep -rl segredo configs", "explanation": "Lista arquivos da árvore que contêm o texto."},
+    {"command": "grep -v DEBUG app.log", "explanation": "Mostra linhas que não correspondem ao padrão."}
+  ],
+  "taskIntro": "Investigue logs de dois serviços e produza listas de erros e arquivos afetados.",
+  "steps": [
+    "Procure erro em logs/app.log ignorando caixa e mostrando números.",
+    "Busque ERROR recursivamente no diretório logs.",
+    "Liste somente os arquivos que contêm ERROR em arquivos-erros.txt.",
+    "Grave linhas de app.log que não são DEBUG em sem-debug.txt."
+  ],
+  "hints": [
+    "Combine -i e -n como -in.",
+    "A opção -r percorre subdiretórios.",
+    "A opção -l imprime apenas nomes de arquivos.",
+    "A opção -v inverte a seleção."
+  ],
+  "startingDirectory": "/home/aluno/grep-lab",
+  "setupCommand": "mkdir -p /home/aluno/grep-lab/logs && printf 'INFO inicio\\nDEBUG cache\\nErro timeout\\nINFO fim\\n' > /home/aluno/grep-lab/logs/app.log && printf 'INFO pronto\\nERROR disco\\n' > /home/aluno/grep-lab/logs/worker.log",
+  "checks": [
+    {"id": "case-line-search", "label": "Você buscou ignorando caixa e mostrando linhas", "command": "grep -Eq 'grep[[:space:]]+-in[[:space:]]+erro[[:space:]]+logs/app\\.log' /home/aluno/.lesson_history", "failureMessage": "Execute grep -in erro logs/app.log."},
+    {"id": "recursive-search", "label": "Você fez uma busca recursiva", "command": "grep -Eq 'grep[[:space:]]+-r[^[:space:]]*[[:space:]]+ERROR[[:space:]]+logs' /home/aluno/.lesson_history", "failureMessage": "Use grep -r ERROR logs."},
+    {"id": "affected-files", "label": "A lista contém o arquivo com ERROR exato", "command": "printf 'logs/worker.log\\n' | cmp -s - /home/aluno/grep-lab/arquivos-erros.txt", "failureMessage": "Grave com grep -rl ERROR logs > arquivos-erros.txt."},
+    {"id": "debug-excluded", "label": "A cópia sem DEBUG preserva as outras linhas", "command": "test \"$(wc -l < /home/aluno/grep-lab/sem-debug.txt)\" -eq 3 && ! grep -q DEBUG /home/aluno/grep-lab/sem-debug.txt && grep -q 'Erro timeout' /home/aluno/grep-lab/sem-debug.txt", "failureMessage": "Use grep -v DEBUG logs/app.log > sem-debug.txt."}
+  ],
+  "smokeCommands": ["grep -in erro logs/app.log", "grep -r ERROR logs", "grep -rl ERROR logs > arquivos-erros.txt", "grep -v DEBUG logs/app.log > sem-debug.txt"]
+}

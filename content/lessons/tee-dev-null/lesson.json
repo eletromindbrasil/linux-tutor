@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "tee-dev-null",
+  "curriculumId": "M04-L04",
+  "moduleId": "M04",
+  "level": "iniciante",
+  "order": 18,
+  "prerequisites": ["pipes"],
+  "eyebrow": "Controle de saída",
+  "title": "Mostre, grave e descarte saídas",
+  "summary": "Use tee para observar e salvar o mesmo fluxo e /dev/null para descartar o que não importa.",
+  "duration": "9 min",
+  "objective": "Capturar uma saída sem interromper o pipeline e silenciar uma saída conhecida.",
+  "concepts": [
+    "tee copia stdin para stdout e também para um ou mais arquivos.",
+    "/dev/null aceita dados e os descarta; redirecione apenas saídas que você decidiu ignorar."
+  ],
+  "examples": [
+    {"command": "comando | tee auditoria.txt", "explanation": "Exibe e grava a mesma saída."},
+    {"command": "comando > /dev/null", "explanation": "Descarta somente a saída padrão."},
+    {"command": "echo extra | tee -a auditoria.txt", "explanation": "Acrescenta ao arquivo sem substituí-lo."}
+  ],
+  "taskIntro": "Gere um resumo visível e auditável, acrescente uma linha e descarte uma listagem de teste.",
+  "steps": [
+    "Ordene dados.txt e passe o resultado por tee resumo.txt.",
+    "Acrescente validado a resumo.txt com tee -a.",
+    "Execute ls /tmp > /dev/null.",
+    "Leia resumo.txt."
+  ],
+  "hints": [
+    "Use sort dados.txt | tee resumo.txt.",
+    "A opção -a significa append.",
+    "/dev/null é um caminho especial do sistema.",
+    "O resumo deve manter as linhas ordenadas e o marcador final."
+  ],
+  "startingDirectory": "/home/aluno/captura",
+  "setupCommand": "mkdir -p /home/aluno/captura && printf 'zeta\\nalfa\\nbeta\\n' > /home/aluno/captura/dados.txt",
+  "checks": [
+    {"id": "tee-summary", "label": "O resumo ordenado foi gravado", "command": "printf 'alfa\\nbeta\\nzeta\\nvalidado\\n' | cmp -s - /home/aluno/captura/resumo.txt", "failureMessage": "resumo.txt deve ter os dados ordenados e a linha validado ao final."},
+    {"id": "tee-used", "label": "Você usou tee para exibir e gravar", "command": "grep -Eq 'sort[[:space:]]+dados\\.txt[[:space:]]*[|][[:space:]]*tee[[:space:]]+resumo\\.txt' /home/aluno/.lesson_history", "failureMessage": "Execute sort dados.txt | tee resumo.txt."},
+    {"id": "tee-appended", "label": "Você acrescentou com tee -a", "command": "grep -Eq 'echo[[:space:]]+validado[[:space:]]*[|][[:space:]]*tee[[:space:]]+-a[[:space:]]+resumo\\.txt' /home/aluno/.lesson_history", "failureMessage": "Use echo validado | tee -a resumo.txt."},
+    {"id": "dev-null-used", "label": "Você descartou uma saída conscientemente", "command": "grep -Eq 'ls[[:space:]]+/tmp[[:space:]]*>[[:space:]]*/dev/null' /home/aluno/.lesson_history", "failureMessage": "Execute ls /tmp > /dev/null."}
+  ],
+  "smokeCommands": ["sort dados.txt | tee resumo.txt", "echo validado | tee -a resumo.txt", "ls /tmp > /dev/null", "cat resumo.txt"]
+}

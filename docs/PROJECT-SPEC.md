@@ -98,7 +98,7 @@ O aprendizado acontece por prática:
 |---|---|---|---|
 | SYS-001 | Aplicação React/Vite servida localmente | done | build Docker e health check |
 | SYS-002 | Backend Node/Express com autenticação | done | login, sessão, logout e troca de senha |
-| SYS-003 | Terminal web com xterm.js e WebSocket | done | smoke test das nove lições |
+| SYS-003 | Terminal web com xterm.js e WebSocket | done | smoke test das 29 lições |
 | SYS-004 | Terminal conectado a Debian real | done | comandos executados no sandbox |
 | SYS-005 | Contêiner descartável por sessão de lição | done | criação e remoção pela API |
 | SYS-006 | Sandbox sem rede e com limites de CPU, memória, processos e capabilities | done | configuração Dockerode |
@@ -122,10 +122,10 @@ O aprendizado acontece por prática:
 | SYS-024 | Schema v1 e validador de catálogo | done | `npm run lessons:validate` |
 | SYS-025 | Solução de referência testada para cada lição | done | smoke percorre o catálogo completo |
 | SYS-026 | Troca obrigatória de senha no primeiro login | done | APIs protegidas retornam 403 até a troca |
-| SYS-027 | Banco isolado em rede interna e volume Compose | done | serviço sem porta publicada |
+| SYS-027 | Banco isolado em rede interna e volume dedicado | done | serviço sem porta publicada |
 | SYS-028 | Autorização de sessões HTTP e WebSocket por usuário | done | cookie HttpOnly e ownership de sandbox |
 | SYS-029 | Reconexão automática do terminal | done | três tentativas antes de orientar reinício |
-| SYS-030 | Deploy automático em produção | done | GitHub Actions, SSH dedicado, Traefik e smoke pós-deploy |
+| SYS-030 | Deploy automático em produção | done | GitHub Actions, Portainer, Traefik e smoke pós-deploy |
 
 ### 4.2 Lições implantadas
 
@@ -143,6 +143,26 @@ por revisão didática antes de ser considerado definitivo.
 | M02-L03 | `remocao-segura` | Remova somente o necessário — `rm`, `rmdir` e `rm -r` | done-prototype |
 | M02-L04 | `links-linux` | Crie links simbólicos e físicos — `ln`, `readlink` e inodes | done-prototype |
 | M02-L05 | `estrutura-linux` | Explore os diretórios essenciais — FHS básico | done-prototype |
+| M03-L01 | `ler-arquivos` | Leia arquivos do começo ao fim — `cat`, `less`, `head` e `tail` | done-prototype |
+| M03-L02 | `editar-com-nano` | Edite um texto com Nano | done-prototype |
+| M03-L03 | `fundamentos-vim` | Entenda os modos do Vim | done-prototype |
+| M03-L04 | `tipos-encoding` | Reconheça tipo, encoding e fim de linha | done-prototype |
+| M03-L05 | `comparar-arquivos` | Encontre diferenças com `diff` e `cmp` | done-prototype |
+| M04-L01 | `fluxos-padrao` | Conheça stdin, stdout e stderr | done-prototype |
+| M04-L02 | `redirecionamentos` | Redirecione com `>`, `>>`, `<` e `2>` | done-prototype |
+| M04-L03 | `pipes` | Monte pipelines pequenos | done-prototype |
+| M04-L04 | `tee-dev-null` | Mostre, grave e descarte saídas | done-prototype |
+| M04-L05 | `codigos-de-saida` | Decida com `$?`, `&&`, `||` e `;` | done-prototype |
+| M05-L01 | `localizar-com-find` | Localize arquivos com `find` | done-prototype |
+| M05-L02 | `localizar-com-locate` | Pesquise rapidamente com `locate` | done-prototype |
+| M05-L03 | `buscar-com-grep` | Encontre texto com `grep` | done-prototype |
+| M05-L04 | `regex-basica` | Expresse padrões com regex | done-prototype |
+| M05-L05 | `contar-ordenar-unicos` | Conte, ordene e elimine duplicados | done-prototype |
+| M06-L01 | `identidade-usuario` | Descubra usuário, UID e grupos | done-prototype |
+| M06-L02 | `permissoes-rwx` | Leia permissões de arquivos e diretórios | done-prototype |
+| M06-L03 | `alterar-permissoes` | Altere permissões com `chmod` | done-prototype |
+| M06-L04 | `dono-e-grupo` | Ajuste dono e grupo com segurança | done-prototype |
+| M06-L05 | `umask-padroes` | Defina padrões seguros com `umask` | done-prototype |
 
 ### 4.3 Estrutura atual relevante
 
@@ -182,7 +202,7 @@ LinuxTutor/
 - O app monta o socket do Docker; a publicação deve permanecer em loopback atrás de proxy HTTPS.
 - Não há recuperação de senha por e-mail; uma redefinição administrativa ainda exige acesso ao banco.
 - O contêiner padrão não serve para tarefas reais de boot, kernel, systemd, discos ou root amplo.
-- A qualidade pedagógica final das nove aulas ainda não foi formalmente revisada.
+- A qualidade pedagógica final das 29 aulas ainda não foi formalmente revisada.
 
 ## 5. Arquitetura alvo
 
@@ -302,7 +322,7 @@ Status: **concluída**.
 Status: **em andamento**.
 
 - ENG-001, ENG-002 e ENG-004 concluídos.
-- Nove lições usam arquivos individuais com schema v1.
+- Vinte e nove lições usam arquivos individuais com schema v1.
 - Catálogo e soluções de referência são validados por comandos próprios.
 - Regras de autoria estão documentadas em `content/README.md`.
 - ENG-003 permanece parcial: checks ainda são comandos shell, não tipos declarativos.
@@ -367,26 +387,26 @@ Status: **em andamento**.
 | M02-L03 | Remover com segurança usando `rm` e `rmdir` | done-prototype |
 | M02-L04 | Links simbólicos e hard links com `ln` | done-prototype |
 | M02-L05 | Estrutura de diretórios Linux e FHS essencial | done-prototype |
-| M03-L01 | Ler arquivos com `cat`, `less`, `head` e `tail` | planned |
-| M03-L02 | Criar e editar texto com `nano` | planned |
-| M03-L03 | Fundamentos de Vim: modos, edição, salvar e sair | planned |
-| M03-L04 | Tipos de arquivo, `file`, encoding e finais de linha | planned |
-| M03-L05 | Comparar arquivos com `diff` e `cmp` | planned |
-| M04-L01 | Saída padrão, erro padrão e entrada padrão | planned |
-| M04-L02 | Redirecionamento com `>`, `>>`, `<` e `2>` | planned |
-| M04-L03 | Pipes e composição de comandos | planned |
-| M04-L04 | `tee`, `/dev/null` e captura simultânea de saída | planned |
-| M04-L05 | Códigos de saída e encadeamento com `&&`, `||` e `;` | planned |
-| M05-L01 | Localizar arquivos com `find` | planned |
-| M05-L02 | Localização rápida com `locate` e bancos de índice | planned |
-| M05-L03 | Buscar texto com `grep` | planned |
-| M05-L04 | Expressões regulares básicas para busca | planned |
-| M05-L05 | Contar, ordenar e eliminar duplicados com `wc`, `sort` e `uniq` | planned |
-| M06-L01 | Usuário, grupo e identidade com `whoami`, `id` e `groups` | planned |
-| M06-L02 | Permissões de leitura, escrita e execução | planned |
-| M06-L03 | Alterar permissões com `chmod` simbólico e octal | planned |
-| M06-L04 | Dono e grupo com `chown` e `chgrp` | planned |
-| M06-L05 | `umask` e permissões padrão | planned |
+| M03-L01 | Ler arquivos com `cat`, `less`, `head` e `tail` | done-prototype |
+| M03-L02 | Criar e editar texto com `nano` | done-prototype |
+| M03-L03 | Fundamentos de Vim: modos, edição, salvar e sair | done-prototype |
+| M03-L04 | Tipos de arquivo, `file`, encoding e finais de linha | done-prototype |
+| M03-L05 | Comparar arquivos com `diff` e `cmp` | done-prototype |
+| M04-L01 | Saída padrão, erro padrão e entrada padrão | done-prototype |
+| M04-L02 | Redirecionamento com `>`, `>>`, `<` e `2>` | done-prototype |
+| M04-L03 | Pipes e composição de comandos | done-prototype |
+| M04-L04 | `tee`, `/dev/null` e captura simultânea de saída | done-prototype |
+| M04-L05 | Códigos de saída e encadeamento com `&&`, `||` e `;` | done-prototype |
+| M05-L01 | Localizar arquivos com `find` | done-prototype |
+| M05-L02 | Localização rápida com `locate` e bancos de índice | done-prototype |
+| M05-L03 | Buscar texto com `grep` | done-prototype |
+| M05-L04 | Expressões regulares básicas para busca | done-prototype |
+| M05-L05 | Contar, ordenar e eliminar duplicados com `wc`, `sort` e `uniq` | done-prototype |
+| M06-L01 | Usuário, grupo e identidade com `whoami`, `id` e `groups` | done-prototype |
+| M06-L02 | Permissões de leitura, escrita e execução | done-prototype |
+| M06-L03 | Alterar permissões com `chmod` simbólico e octal | done-prototype |
+| M06-L04 | Dono e grupo com `chown` e `chgrp` | done-prototype |
+| M06-L05 | `umask` e permissões padrão | done-prototype |
 | M06-L06 | Princípios de `sudo` e menor privilégio | planned |
 | M07-L01 | Variáveis de ambiente e expansão com `$` | planned |
 | M07-L02 | Aspas simples, duplas, escaping e globbing | planned |
@@ -500,8 +520,8 @@ Na próxima sequência, priorizar:
 
 1. Concluir ENG-003 com verificadores declarativos para os tipos já necessários.
 2. M00-L01 a M00-L03 — onboarding e segurança.
-3. M03 e M04 — leitura, edição, redirecionamento e pipes.
-4. M05 a M08 — busca, permissões, shell e processos.
+3. M06-L06 — princípios de `sudo` e menor privilégio em cenário não privilegiado.
+4. M07 e M08 — ambiente do shell, produtividade e processos.
 5. Validar a trilha iniciante inteira antes de ampliar o volume intermediário.
 
 Não produzir dezenas de conteúdos antes de o schema, o validador e o test runner de lições
@@ -569,3 +589,4 @@ O serviço `app` deve aparecer como `healthy`.
 | 2026-08-27 | Implantados PostgreSQL isolado, autenticação, troca obrigatória no primeiro login e progresso por usuário. |
 | 2026-08-27 | Reativado e reforçado o terminal com origem compatível com proxy, ownership por usuário, reconexão e limpeza por instância. |
 | 2026-08-27 | Automatizado deploy da stack original em `linux.eletrovps.com` via GitHub Actions e Portainer. |
+| 2026-08-27 | Implantadas 20 novas lições, concluindo M03, M04, M05 e M06 até permissões padrão. |

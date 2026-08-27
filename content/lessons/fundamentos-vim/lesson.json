@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "fundamentos-vim",
+  "curriculumId": "M03-L03",
+  "moduleId": "M03",
+  "level": "iniciante",
+  "order": 12,
+  "prerequisites": ["editar-com-nano"],
+  "eyebrow": "Edição modal",
+  "title": "Entenda os modos do Vim",
+  "summary": "Alterne entre navegação, inserção e comandos para editar sem ficar preso no editor.",
+  "duration": "12 min",
+  "objective": "Editar e salvar um arquivo usando os modos normal, inserção e comando do Vim.",
+  "concepts": [
+    "Vim inicia no modo normal; i entra no modo de inserção e Esc retorna ao modo normal.",
+    "No modo normal, :w salva, :q sai e :wq faz as duas ações."
+  ],
+  "examples": [
+    {"command": "vim diario.txt", "explanation": "Abre o arquivo no modo normal."},
+    {"command": "i ... Esc :wq", "explanation": "Insere texto, volta ao modo normal, salva e sai."}
+  ],
+  "taskIntro": "Substitua o conteúdo do diário por três lembretes que resumem os modos essenciais.",
+  "steps": [
+    "Abra diario.txt com vim.",
+    "Entre no modo de inserção e escreva as três linhas indicadas nas dicas.",
+    "Pressione Esc e use :wq para salvar e sair.",
+    "Confira o resultado com cat."
+  ],
+  "hints": [
+    "No Vim, pressione i antes de digitar.",
+    "Escreva: Modo normal navega.",
+    "Depois: Modo insercao escreve. e Comando :wq salva.",
+    "Pressione Esc, digite :wq e confirme com Enter."
+  ],
+  "startingDirectory": "/home/aluno/editor-vim",
+  "setupCommand": "mkdir -p /home/aluno/editor-vim && printf 'linha antiga um\\nlinha antiga dois\\nlinha antiga tres\\n' > /home/aluno/editor-vim/diario.txt",
+  "checks": [
+    {"id": "vim-content", "label": "O diário contém o resumo dos modos", "command": "printf 'Modo normal navega.\\nModo insercao escreve.\\nComando :wq salva.\\n' | cmp -s - /home/aluno/editor-vim/diario.txt", "failureMessage": "O conteúdo de diario.txt ainda não corresponde às três linhas pedidas."},
+    {"id": "vim-used", "label": "Você abriu o arquivo com Vim", "command": "grep -Eq '^[[:space:]]*vim([[:space:]]|$)' /home/aluno/.lesson_history", "failureMessage": "Use vim diario.txt para praticar a edição modal."},
+    {"id": "vim-result-read", "label": "Você conferiu o diário salvo", "command": "grep -Eq '^[[:space:]]*cat[[:space:]]+diario\\.txt[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute cat diario.txt depois de sair do Vim."}
+  ],
+  "smokeCommands": ["vim -es -u NONE -c '1s/.*/Modo normal navega./' -c '2s/.*/Modo insercao escreve./' -c '3s/.*/Comando :wq salva./' -c 'wq' diario.txt", "cat diario.txt"]
+}

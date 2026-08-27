@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "codigos-de-saida",
+  "curriculumId": "M04-L05",
+  "moduleId": "M04",
+  "level": "iniciante",
+  "order": 19,
+  "prerequisites": ["tee-dev-null"],
+  "eyebrow": "Controle de execução",
+  "title": "Decida pelo código de saída",
+  "summary": "Leia o status do último comando e escolha entre executar por sucesso, falha ou apenas sequência.",
+  "duration": "11 min",
+  "objective": "Usar $?, &&, || e ; sem confundir sucesso lógico com texto exibido.",
+  "concepts": [
+    "Código 0 significa sucesso; valores diferentes de zero indicam algum tipo de falha.",
+    "&& depende de sucesso, || depende de falha e ; apenas separa comandos."
+  ],
+  "examples": [
+    {"command": "teste && echo passou", "explanation": "echo roda somente se teste retornar 0."},
+    {"command": "teste || echo falhou", "explanation": "echo roda somente se teste falhar."},
+    {"command": "primeiro ; segundo", "explanation": "segundo roda independentemente do primeiro."}
+  ],
+  "taskIntro": "Execute verificações controladas e grave em resultado.txt as decisões corretas.",
+  "steps": [
+    "Execute true e depois echo $? para observar sucesso.",
+    "Execute false e depois echo $? para observar falha.",
+    "Use test -f presente.txt && echo encontrado > resultado.txt.",
+    "Use test -f ausente.txt || echo ausente >> resultado.txt e acrescente sempre com ;."
+  ],
+  "hints": [
+    "$? deve ser lido imediatamente após o comando investigado.",
+    "O arquivo presente.txt já existe.",
+    "Use && no caso de sucesso e || no caso de falha.",
+    "Finalize com echo sempre >> resultado.txt depois de um ponto e vírgula."
+  ],
+  "startingDirectory": "/home/aluno/status",
+  "setupCommand": "mkdir -p /home/aluno/status && touch /home/aluno/status/presente.txt",
+  "checks": [
+    {"id": "status-read", "label": "Você consultou códigos de saída", "command": "test \"$(grep -Ec '^[[:space:]]*echo[[:space:]]+\\$\\?[[:space:]]*$' /home/aluno/.lesson_history)\" -ge 2", "failureMessage": "Execute echo $? logo após true e também após false."},
+    {"id": "and-used", "label": "Você condicionou uma ação ao sucesso", "command": "grep -Eq 'test[[:space:]]+-f[[:space:]]+presente\\.txt[[:space:]]*&&[[:space:]]*echo[[:space:]]+encontrado' /home/aluno/.lesson_history", "failureMessage": "Use test -f presente.txt && echo encontrado > resultado.txt."},
+    {"id": "or-used", "label": "Você tratou uma falha esperada", "command": "grep -Eq 'test[[:space:]]+-f[[:space:]]+ausente\\.txt[[:space:]]*[|][|][[:space:]]*echo[[:space:]]+ausente' /home/aluno/.lesson_history", "failureMessage": "Use test -f ausente.txt || echo ausente >> resultado.txt."},
+    {"id": "sequence-result", "label": "O resultado registra as três decisões", "command": "printf 'encontrado\\nausente\\nsempre\\n' | cmp -s - /home/aluno/status/resultado.txt", "failureMessage": "resultado.txt deve conter encontrado, ausente e sempre nessa ordem."}
+  ],
+  "smokeCommands": ["true", "echo $?", "false", "echo $?", "test -f presente.txt && echo encontrado > resultado.txt", "test -f ausente.txt || echo ausente >> resultado.txt", "true ; echo sempre >> resultado.txt", "cat resultado.txt"]
+}

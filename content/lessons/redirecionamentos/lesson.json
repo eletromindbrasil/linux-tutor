@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "redirecionamentos",
+  "curriculumId": "M04-L02",
+  "moduleId": "M04",
+  "level": "iniciante",
+  "order": 16,
+  "prerequisites": ["fluxos-padrao"],
+  "eyebrow": "Entrada e saída",
+  "title": "Redirecione sem perder informação",
+  "summary": "Grave, acrescente, leia pela entrada padrão e separe mensagens de erro.",
+  "duration": "11 min",
+  "objective": "Usar >, >>, < e 2> e explicar quando um arquivo é substituído ou ampliado.",
+  "concepts": [
+    "> cria ou substitui um arquivo, enquanto >> acrescenta ao final.",
+    "< fornece um arquivo como stdin e 2> captura stderr separadamente."
+  ],
+  "examples": [
+    {"command": "echo inicio > registro.txt", "explanation": "Cria ou substitui registro.txt."},
+    {"command": "echo fim >> registro.txt", "explanation": "Acrescenta sem remover a primeira linha."},
+    {"command": "wc -l < registro.txt", "explanation": "Entrega o arquivo ao stdin de wc."},
+    {"command": "ls inexistente 2> erros.txt", "explanation": "Guarda somente a mensagem de erro."}
+  ],
+  "taskIntro": "Monte um registro de duas linhas, conte-o via stdin e capture um diagnóstico separado.",
+  "steps": [
+    "Grave inicio em registro.txt usando >.",
+    "Acrescente fim usando >>.",
+    "Execute wc -l < registro.txt.",
+    "Execute ls ausente 2> erros.txt e leia os dois arquivos."
+  ],
+  "hints": [
+    "O primeiro redirecionamento deve usar apenas um sinal >.",
+    "O segundo usa dois sinais >>.",
+    "Coloque < registro.txt depois de wc -l.",
+    "O descritor do stderr é 2."
+  ],
+  "startingDirectory": "/home/aluno/redirecionamento",
+  "setupCommand": "mkdir -p /home/aluno/redirecionamento",
+  "checks": [
+    {"id": "record-content", "label": "O registro preserva as duas linhas", "command": "printf 'inicio\\nfim\\n' | cmp -s - /home/aluno/redirecionamento/registro.txt", "failureMessage": "registro.txt deve conter inicio e fim, nessa ordem."},
+    {"id": "overwrite-used", "label": "Você criou o registro com >", "command": "grep -Eq 'echo[[:space:]]+inicio[[:space:]]*>[[:space:]]*registro\\.txt' /home/aluno/.lesson_history", "failureMessage": "Use echo inicio > registro.txt."},
+    {"id": "append-used", "label": "Você acrescentou a segunda linha com >>", "command": "grep -Eq 'echo[[:space:]]+fim[[:space:]]*>>[[:space:]]*registro\\.txt' /home/aluno/.lesson_history", "failureMessage": "Use echo fim >> registro.txt."},
+    {"id": "stdin-redirection", "label": "Você contou linhas pela entrada padrão", "command": "grep -Eq 'wc[[:space:]]+-l[[:space:]]*<[[:space:]]*registro\\.txt' /home/aluno/.lesson_history", "failureMessage": "Execute wc -l < registro.txt."},
+    {"id": "stderr-captured", "label": "O erro foi capturado separadamente", "command": "test -s /home/aluno/redirecionamento/erros.txt && grep -Eq 'ls[[:space:]]+ausente[[:space:]]*2>[[:space:]]*erros\\.txt' /home/aluno/.lesson_history", "failureMessage": "Execute ls ausente 2> erros.txt."}
+  ],
+  "smokeCommands": ["echo inicio > registro.txt", "echo fim >> registro.txt", "wc -l < registro.txt", "ls ausente 2> erros.txt || true", "cat registro.txt", "cat erros.txt"]
+}

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "editar-com-nano",
+  "curriculumId": "M03-L02",
+  "moduleId": "M03",
+  "level": "iniciante",
+  "order": 11,
+  "prerequisites": ["ler-arquivos"],
+  "eyebrow": "Edição de texto",
+  "title": "Edite um texto com Nano",
+  "summary": "Use um editor amigável no terminal e aprenda a salvar, confirmar o nome e sair.",
+  "duration": "10 min",
+  "objective": "Abrir, corrigir e salvar um arquivo de texto com Nano.",
+  "concepts": [
+    "Nano mostra na parte inferior atalhos em que ^ representa a tecla Ctrl.",
+    "Ctrl+O grava, Enter confirma o nome e Ctrl+X encerra o editor."
+  ],
+  "examples": [
+    {"command": "nano rascunho.txt", "explanation": "Abre o arquivo no editor Nano."},
+    {"command": "Ctrl+O, Enter, Ctrl+X", "explanation": "Salva no mesmo caminho e volta ao shell."}
+  ],
+  "taskIntro": "Transforme o rascunho em uma lista curta de três compromissos de estudo.",
+  "steps": [
+    "Abra rascunho.txt com nano.",
+    "Deixe exatamente três linhas: Revisar comandos, Praticar no terminal e Registrar duvidas.",
+    "Salve com Ctrl+O, confirme com Enter e saia com Ctrl+X.",
+    "Confira o resultado com cat rascunho.txt."
+  ],
+  "hints": [
+    "Execute nano rascunho.txt.",
+    "Cada compromisso deve ocupar sua própria linha.",
+    "O atalho ^O significa Ctrl+O.",
+    "Depois de sair, use cat para confirmar o arquivo."
+  ],
+  "startingDirectory": "/home/aluno/editor-nano",
+  "setupCommand": "mkdir -p /home/aluno/editor-nano && printf 'trocar este rascunho\\n' > /home/aluno/editor-nano/rascunho.txt",
+  "checks": [
+    {"id": "three-lines", "label": "O arquivo possui exatamente três linhas", "command": "test \"$(wc -l < /home/aluno/editor-nano/rascunho.txt)\" -eq 3", "failureMessage": "Deixe exatamente três linhas em rascunho.txt."},
+    {"id": "nano-content", "label": "Os três compromissos foram registrados", "command": "printf 'Revisar comandos\\nPraticar no terminal\\nRegistrar duvidas\\n' | cmp -s - /home/aluno/editor-nano/rascunho.txt", "failureMessage": "Confira texto, ordem e quebras de linha solicitados."},
+    {"id": "nano-opened", "label": "Você praticou o Nano", "command": "grep -Eq '^[[:space:]]*nano([[:space:]]+rascunho\\.txt|[[:space:]]+--version)[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Abra o arquivo com nano rascunho.txt."},
+    {"id": "nano-result-read", "label": "Você conferiu o resultado", "command": "grep -Eq '^[[:space:]]*cat[[:space:]]+rascunho\\.txt[[:space:]]*$' /home/aluno/.lesson_history", "failureMessage": "Execute cat rascunho.txt depois de salvar."}
+  ],
+  "smokeCommands": ["printf 'Revisar comandos\\nPraticar no terminal\\nRegistrar duvidas\\n' > rascunho.txt", "nano --version", "cat rascunho.txt"]
+}

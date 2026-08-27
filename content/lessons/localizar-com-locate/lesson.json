@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "localizar-com-locate",
+  "curriculumId": "M05-L02",
+  "moduleId": "M05",
+  "level": "iniciante",
+  "order": 21,
+  "prerequisites": ["localizar-com-find"],
+  "eyebrow": "Busca indexada",
+  "title": "Pesquise rapidamente com locate",
+  "summary": "Entenda por que locate é rápido, como seu banco fica desatualizado e quando usar find.",
+  "duration": "10 min",
+  "objective": "Consultar e atualizar um banco de caminhos limitado ao laboratório.",
+  "concepts": [
+    "locate consulta um índice pronto e por isso não percorre o disco a cada pesquisa.",
+    "Arquivos novos só aparecem depois que o banco é atualizado."
+  ],
+  "examples": [
+    {"command": "locate -d indice.db '*.conf'", "explanation": "Consulta um banco específico por padrão de caminho."},
+    {"command": "updatedb --localpaths=/home/aluno/indice/dados --output=indice.db", "explanation": "Reconstrói um índice limitado à árvore de prática."}
+  ],
+  "taskIntro": "Consulte o índice preparado, crie um arquivo novo, atualize o banco e confirme que ele aparece.",
+  "steps": [
+    "Use locate -d indice.db '*.conf' e grave a saída inicial em antes.txt.",
+    "Crie dados/configs/nova.conf.",
+    "Atualize o banco limitando localpaths a /home/aluno/indice/dados e grave em indice.db.",
+    "Repita locate e grave o resultado em depois.txt."
+  ],
+  "hints": [
+    "A opção -d escolhe o arquivo de banco.",
+    "Antes da atualização, nova.conf ainda não faz parte do índice.",
+    "--localpaths limita a árvore que updatedb percorre.",
+    "Depois da atualização devem aparecer duas configurações."
+  ],
+  "startingDirectory": "/home/aluno/indice",
+  "setupCommand": "mkdir -p /home/aluno/indice/dados/{configs,docs} && printf 'tema=claro\\n' > /home/aluno/indice/dados/configs/base.conf && printf 'manual\\n' > /home/aluno/indice/dados/docs/manual.txt && updatedb --localpaths=/home/aluno/indice/dados --output=/home/aluno/indice/indice.db",
+  "checks": [
+    {"id": "initial-locate", "label": "Você consultou o índice inicial", "command": "test -f /home/aluno/indice/antes.txt && grep -q 'base.conf$' /home/aluno/indice/antes.txt && ! grep -q 'nova.conf$' /home/aluno/indice/antes.txt", "failureMessage": "Grave a primeira consulta locate em antes.txt antes de criar nova.conf."},
+    {"id": "database-updated", "label": "Você atualizou o banco limitado ao laboratório", "command": "grep -Eq 'updatedb[[:space:]]+--localpaths=/home/aluno/indice/dados[[:space:]]+--output=indice\\.db' /home/aluno/.lesson_history", "failureMessage": "Execute updatedb --localpaths=/home/aluno/indice/dados --output=indice.db depois de criar o arquivo."},
+    {"id": "new-file-located", "label": "O índice atualizado encontra a nova configuração", "command": "test -f /home/aluno/indice/depois.txt && grep -q 'base.conf$' /home/aluno/indice/depois.txt && grep -q 'nova.conf$' /home/aluno/indice/depois.txt", "failureMessage": "Repita locate após atualizar o índice e grave em depois.txt."},
+    {"id": "locate-used", "label": "Você praticou a consulta com locate", "command": "test \"$(grep -Ec 'locate[[:space:]]+-d[[:space:]]+indice\\.db' /home/aluno/.lesson_history)\" -ge 2", "failureMessage": "Consulte indice.db com locate antes e depois da atualização."}
+  ],
+  "smokeCommands": ["locate -d indice.db '*.conf' > antes.txt", "touch dados/configs/nova.conf", "updatedb --localpaths=/home/aluno/indice/dados --output=indice.db", "locate -d indice.db '*.conf' > depois.txt", "cat depois.txt"]
+}

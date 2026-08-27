@@ -9,17 +9,14 @@ A visão, o estado de implementação, o backlog e o mapa curricular canônico e
 [`docs/PROJECT-SPEC.md`](docs/PROJECT-SPEC.md). Novas threads devem ler essa spec antes de
 alterar o projeto.
 
-Este protótipo contém nove lições:
+Este protótipo contém 29 lições, organizadas em seis módulos:
 
-1. Navegação com `pwd`, `ls` e `cd`.
-2. Caminhos relativos, absolutos, `..` e `~`.
-3. Listagens detalhadas e arquivos ocultos com opções de `ls`.
-4. Ajuda local com `type`, `--help`, `man` e `apropos`.
-5. Criação de diretórios e arquivos com `mkdir`, `touch`, `echo` e `cat`.
-6. Cópia, movimentação e renomeação com `cp` e `mv`.
-7. Remoção consciente com `rm`, `rmdir` e `rm -r`.
-8. Links simbólicos e hard links com `ln`, `readlink` e inodes.
-9. Estrutura essencial do Linux: `/etc`, `/var/log`, `/tmp` e identificação da distribuição.
+1. Fundamentos do terminal, navegação, caminhos, listagens e ajuda local.
+2. Criação, organização, remoção e links de arquivos, além da estrutura Linux.
+3. Leitura, edição com Nano e Vim, tipos, encoding e comparação de textos.
+4. stdin, stdout, stderr, redirecionamentos, pipes, `tee` e códigos de saída.
+5. Busca com `find`, `locate`, `grep`, regex, contagem, ordenação e valores únicos.
+6. Identidade, grupos, leitura e alteração de permissões, ownership e `umask`.
 
 As aulas ficam em `content/lessons/<id>/lesson.json`. Para validar o catálogo:
 
@@ -72,7 +69,7 @@ de entrada público e precisa encaminhar upgrades WebSocket.
 
 Cada push na branch `main` executa o workflow `.github/workflows/deploy-production.yml`. Ele usa a
 API do Portainer da VPS original para construir imagens vinculadas ao commit, atualizar a stack
-Swarm `linux-tutor` e validar autenticação, troca de senha e os terminais das nove lições. O ambiente
+Swarm `linux-tutor` e validar autenticação, troca de senha e os terminais das 29 lições. O ambiente
 público é <https://linux.eletrovps.com>.
 
 As credenciais do Portainer ficam no environment `production` do GitHub. O PostgreSQL usa volume e

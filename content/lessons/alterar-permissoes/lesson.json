@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "alterar-permissoes",
+  "curriculumId": "M06-L03",
+  "moduleId": "M06",
+  "level": "iniciante",
+  "order": 27,
+  "prerequisites": ["permissoes-rwx"],
+  "eyebrow": "Controle de acesso",
+  "title": "Altere permissões com chmod",
+  "summary": "Use notação simbólica para mudanças pontuais e octal para definir um modo completo.",
+  "duration": "12 min",
+  "objective": "Aplicar chmod simbólico e octal e conferir o modo final com stat.",
+  "concepts": [
+    "Na forma simbólica, u, g e o escolhem classes e +, - ou = alteram permissões.",
+    "Na forma octal, r=4, w=2 e x=1; cada dígito representa dono, grupo ou outros."
+  ],
+  "examples": [
+    {"command": "chmod u+x executar.sh", "explanation": "Adiciona execução somente ao dono."},
+    {"command": "chmod 640 segredo.txt", "explanation": "Define rw para dono, r para grupo e nada para outros."},
+    {"command": "stat -c '%a %n' arquivo", "explanation": "Mostra o modo octal e o nome."}
+  ],
+  "taskIntro": "Corrija três modos excessivos ou insuficientes e confirme os valores finais.",
+  "steps": [
+    "Adicione execução ao dono de executar.sh com notação simbólica.",
+    "Defina segredo.txt como 640.",
+    "Remova todas as permissões de grupo e outros em privado.txt com go-rwx.",
+    "Confira tudo com stat -c '%a %n'."
+  ],
+  "hints": [
+    "Use chmod u+x executar.sh.",
+    "O modo pedido para segredo.txt já está em octal.",
+    "go representa group e others juntos.",
+    "Passe os três nomes para um único stat."
+  ],
+  "startingDirectory": "/home/aluno/chmod-lab",
+  "setupCommand": "mkdir -p /home/aluno/chmod-lab && printf '#!/bin/sh\\necho pronto\\n' > /home/aluno/chmod-lab/executar.sh && printf 'reservado\\n' > /home/aluno/chmod-lab/segredo.txt && printf 'privado\\n' > /home/aluno/chmod-lab/privado.txt && chmod 644 /home/aluno/chmod-lab/executar.sh && chmod 666 /home/aluno/chmod-lab/segredo.txt /home/aluno/chmod-lab/privado.txt",
+  "checks": [
+    {"id": "owner-execute", "label": "O script é executável somente para o dono", "command": "test \"$(stat -c %a /home/aluno/chmod-lab/executar.sh)\" = 744", "failureMessage": "Use chmod u+x executar.sh e preserve as demais permissões."},
+    {"id": "secret-mode", "label": "O segredo está com modo 640", "command": "test \"$(stat -c %a /home/aluno/chmod-lab/segredo.txt)\" = 640", "failureMessage": "Execute chmod 640 segredo.txt."},
+    {"id": "private-mode", "label": "Grupo e outros não acessam privado.txt", "command": "test \"$(stat -c %a /home/aluno/chmod-lab/privado.txt)\" = 600", "failureMessage": "Use chmod go-rwx privado.txt."},
+    {"id": "both-notations", "label": "Você praticou chmod simbólico e octal", "command": "grep -Eq 'chmod[[:space:]]+u[+]x[[:space:]]+executar\\.sh' /home/aluno/.lesson_history && grep -Eq 'chmod[[:space:]]+640[[:space:]]+segredo\\.txt' /home/aluno/.lesson_history && grep -Eq 'chmod[[:space:]]+go-rwx[[:space:]]+privado\\.txt' /home/aluno/.lesson_history", "failureMessage": "Aplique os três comandos chmod pedidos."}
+  ],
+  "smokeCommands": ["chmod u+x executar.sh", "chmod 640 segredo.txt", "chmod go-rwx privado.txt", "stat -c '%a %n' executar.sh segredo.txt privado.txt"]
+}
