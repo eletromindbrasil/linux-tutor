@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "formatos-portateis",
+  "curriculumId": "M10-L04",
+  "moduleId": "M10",
+  "level": "intermediario",
+  "order": 48,
+  "prerequisites": ["inspecionar-pacotes-dpkg"],
+  "eyebrow": "Distribuição portátil",
+  "title": "Compare AppImage, Flatpak e Snap",
+  "summary": "Reconheça os modelos portáteis e experimente o fluxo de um executável independente sem instalação administrativa.",
+  "duration": "11 min",
+  "objective": "Diferenciar AppImage, Flatpak e Snap e verificar quais runtimes estão disponíveis.",
+  "concepts": [
+    "AppImage costuma ser um único executável e não garante sandbox por si só; Flatpak combina runtimes, permissões e isolamento voltados a aplicações.",
+    "Snap é gerenciado pelo serviço snapd. Este laboratório não executa esses serviços e usa um binário didático apenas para praticar o fluxo de arquivo executável."
+  ],
+  "examples": [
+    {"command": "file Ferramenta.AppImage", "explanation": "Inspeciona o tipo real do artefato antes de executá-lo."},
+    {"command": "chmod u+x Aplicativo.AppImage", "explanation": "Concede execução ao dono quando necessário."},
+    {"command": "command -v flatpak", "explanation": "Confirma se o runtime está disponível no sistema atual."}
+  ],
+  "taskIntro": "Inspecione o executável didático, teste-o e documente as diferenças entre os três modelos.",
+  "steps": [
+    "Use file em Ferramenta.AppImage e grave a identificação em tipo.txt.",
+    "Execute Ferramenta.AppImage com o argumento AppImage executado e grave a saída em execucao.txt.",
+    "Registre em snap.txt e flatpak.txt se cada comando está disponível.",
+    "Crie comparativo.txt com uma linha correta para AppImage, Flatpak e Snap."
+  ],
+  "hints": [
+    "O artefato didático já é executável e deve ser chamado com ./.",
+    "Use command -v programa || printf ... para registrar uma ausência esperada.",
+    "AppImage é arquivo único; Flatpak usa runtime; Snap é gerenciado por serviço.",
+    "Formato de distribuição não elimina a necessidade de confiar na origem e verificar assinaturas."
+  ],
+  "startingDirectory": "/home/aluno/formatos",
+  "setupCommand": "mkdir -p /home/aluno/formatos && cp /bin/echo /home/aluno/formatos/Ferramenta.AppImage && chmod u+x /home/aluno/formatos/Ferramenta.AppImage",
+  "checks": [
+    {"id": "artifact-inspected", "label": "O tipo do executável foi inspecionado", "command": "grep -Fq 'Ferramenta.AppImage: ELF' /home/aluno/formatos/tipo.txt && grep -Eq 'file[[:space:]]+Ferramenta\\.AppImage' /home/aluno/.lesson_history", "failureMessage": "Execute file Ferramenta.AppImage e grave a saída em tipo.txt."},
+    {"id": "artifact-executed", "label": "O executável independente foi iniciado pelo caminho", "command": "grep -Fxq 'AppImage executado' /home/aluno/formatos/execucao.txt", "failureMessage": "Execute ./Ferramenta.AppImage 'AppImage executado' e grave a saída."},
+    {"id": "runtimes-checked", "label": "A disponibilidade de Snap e Flatpak foi verificada", "command": "grep -Fxq 'snap indisponivel' /home/aluno/formatos/snap.txt && grep -Fxq 'flatpak indisponivel' /home/aluno/formatos/flatpak.txt", "failureMessage": "Use command -v com uma alternativa que registre a indisponibilidade esperada."},
+    {"id": "formats-compared", "label": "Os três modelos foram diferenciados", "command": "grep -Fxq 'AppImage: arquivo unico sem instalacao' /home/aluno/formatos/comparativo.txt && grep -Fxq 'Flatpak: aplicativo com runtime' /home/aluno/formatos/comparativo.txt && grep -Fxq 'Snap: pacote gerenciado por servico' /home/aluno/formatos/comparativo.txt", "failureMessage": "Registre no comparativo uma característica correta de cada formato."}
+  ],
+  "smokeCommands": ["file Ferramenta.AppImage > tipo.txt", "./Ferramenta.AppImage 'AppImage executado' > execucao.txt", "command -v snap > snap.txt || printf 'snap indisponivel\\n' > snap.txt", "command -v flatpak > flatpak.txt || printf 'flatpak indisponivel\\n' > flatpak.txt", "printf 'AppImage: arquivo unico sem instalacao\\nFlatpak: aplicativo com runtime\\nSnap: pacote gerenciado por servico\\n' > comparativo.txt"]
+}

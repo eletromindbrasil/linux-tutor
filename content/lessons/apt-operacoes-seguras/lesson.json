@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "apt-operacoes-seguras",
+  "curriculumId": "M10-L02",
+  "moduleId": "M10",
+  "level": "intermediario",
+  "order": 46,
+  "prerequisites": ["distro-repositorios-pacotes"],
+  "eyebrow": "Operações com apt",
+  "title": "Planeje operações apt sem alterar o sistema",
+  "summary": "Consulte pacotes e simule atualização, instalação e remoção antes de executar mudanças administrativas.",
+  "duration": "13 min",
+  "objective": "Usar consultas e simulações apt para prever downloads e alterações de pacotes.",
+  "concepts": [
+    "apt update atualiza índices; apt upgrade altera pacotes. Instalar ou remover exige privilégios e deve partir de um plano revisado.",
+    "apt-get -s simula mudanças e --print-uris mostra o que uma atualização de índices buscaria sem acessar a rede."
+  ],
+  "examples": [
+    {"command": "apt list --installed nano", "explanation": "Consulta a versão instalada sem modificar o sistema."},
+    {"command": "apt-get -s install nano", "explanation": "Simula a instalação e mostra o plano de resolução."},
+    {"command": "apt-get -s remove nano", "explanation": "Simula a remoção sem tocar no pacote real."}
+  ],
+  "taskIntro": "Monte um relatório de operações apt mantendo o laboratório intacto e offline.",
+  "steps": [
+    "Consulte nano entre os pacotes instalados e grave em busca.txt.",
+    "Use apt-get --print-uris update para gravar em indices.txt os índices que seriam buscados.",
+    "Simule a instalação de nano em instalar.txt e sua remoção em remover.txt.",
+    "Simule um upgrade geral e grave o plano em atualizar.txt."
+  ],
+  "hints": [
+    "Redirecione também stderr da consulta apt list para manter o relatório completo.",
+    "--print-uris não baixa os índices; ele apenas imprime os endereços.",
+    "Coloque -s antes da ação install, remove ou upgrade.",
+    "O nano deve continuar instalado após todas as simulações."
+  ],
+  "startingDirectory": "/home/aluno/apt-lab",
+  "setupCommand": "mkdir -p /home/aluno/apt-lab",
+  "checks": [
+    {"id": "installed-searched", "label": "O pacote instalado foi localizado", "command": "grep -Fq 'nano/now' /home/aluno/apt-lab/busca.txt && grep -Fq '[installed,local]' /home/aluno/apt-lab/busca.txt", "failureMessage": "Execute apt list --installed nano e grave stdout e stderr em busca.txt."},
+    {"id": "indexes-planned", "label": "A atualização de índices foi planejada sem download", "command": "grep -Fq 'deb.debian.org/debian/dists/bookworm/InRelease' /home/aluno/apt-lab/indices.txt && grep -Eq 'apt-get[[:space:]]+--print-uris[[:space:]]+update' /home/aluno/.lesson_history", "failureMessage": "Use apt-get --print-uris update e grave os endereços em indices.txt."},
+    {"id": "changes-simulated", "label": "Instalação, remoção e upgrade foram simulados", "command": "grep -Fq 'nano is already the newest version' /home/aluno/apt-lab/instalar.txt && grep -Fq 'Remv nano' /home/aluno/apt-lab/remover.txt && grep -Fq '0 upgraded' /home/aluno/apt-lab/atualizar.txt", "failureMessage": "Execute as três operações com -s e grave cada plano no arquivo indicado."},
+    {"id": "system-unchanged", "label": "O pacote nano continua instalado", "command": "dpkg-query -W -f='${Status}' nano 2>/dev/null | grep -Fxq 'install ok installed'", "failureMessage": "O nano não está instalado; reinicie a lição e use somente simulações com -s."}
+  ],
+  "smokeCommands": ["apt list --installed nano > busca.txt 2>&1", "apt-get --print-uris update > indices.txt", "apt-get -s install nano > instalar.txt", "apt-get -s remove nano > remover.txt", "apt-get -s upgrade > atualizar.txt"]
+}

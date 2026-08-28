@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "sincronizar-com-rsync",
+  "curriculumId": "M09-L04",
+  "moduleId": "M09",
+  "level": "intermediario",
+  "order": 44,
+  "prerequisites": ["checksums-integridade"],
+  "eyebrow": "Sincronização eficiente",
+  "title": "Planeje e aplique uma sincronização",
+  "summary": "Use rsync em modo de simulação antes de espelhar uma árvore e remover itens obsoletos.",
+  "duration": "13 min",
+  "objective": "Interpretar a barra final, simular mudanças e sincronizar duas árvores com rsync.",
+  "concepts": [
+    "fonte/ copia o conteúdo da pasta, enquanto fonte sem barra pode criar a própria pasta no destino.",
+    "--dry-run mostra o plano sem alterar arquivos; --delete exige revisão porque remove itens ausentes na origem."
+  ],
+  "examples": [
+    {"command": "rsync -avn --delete fonte/ destino/", "explanation": "Simula um espelhamento detalhado sem escrever."},
+    {"command": "rsync -av --delete fonte/ destino/", "explanation": "Aplica o plano e remove itens obsoletos do destino."},
+    {"command": "diff -r fonte destino", "explanation": "Confirma que as árvores finais são equivalentes."}
+  ],
+  "taskIntro": "Revise um plano de rsync e transforme destino em um espelho exato de fonte.",
+  "steps": [
+    "Simule rsync com -avn, --delete e barras finais; grave a saída em plano.txt.",
+    "Confirme no plano que obsoleto.txt será removido e que os arquivos da fonte serão copiados.",
+    "Execute a mesma sincronização sem -n e grave a saída em sincronizacao.txt.",
+    "Compare as árvores com diff -r."
+  ],
+  "hints": [
+    "-a preserva estrutura e metadados comuns; -v detalha; -n faz dry-run.",
+    "Use fonte/ e destino/ para sincronizar os conteúdos.",
+    "Mantenha --delete somente depois de revisar plano.txt.",
+    "Um diff -r silencioso indica árvores equivalentes."
+  ],
+  "startingDirectory": "/home/aluno/rsync-lab",
+  "setupCommand": "mkdir -p /home/aluno/rsync-lab/fonte/docs /home/aluno/rsync-lab/destino && printf 'versao atual\\n' > /home/aluno/rsync-lab/fonte/app.txt && printf 'manual\\n' > /home/aluno/rsync-lab/fonte/docs/manual.txt && printf 'antigo\\n' > /home/aluno/rsync-lab/destino/app.txt && printf 'remover\\n' > /home/aluno/rsync-lab/destino/obsoleto.txt",
+  "checks": [
+    {"id": "dry-run-reviewed", "label": "A simulação registrou cópias e remoção", "command": "grep -Fq 'deleting obsoleto.txt' /home/aluno/rsync-lab/plano.txt && grep -Fq 'docs/manual.txt' /home/aluno/rsync-lab/plano.txt", "failureMessage": "Execute o dry-run com --delete e revise o plano em plano.txt."},
+    {"id": "trailing-slashes", "label": "Você sincronizou o conteúdo usando barras finais", "command": "grep -Eq 'rsync[[:space:]]+-av(n)?[[:space:]]+--delete[[:space:]]+fonte/[[:space:]]+destino/' /home/aluno/.lesson_history", "failureMessage": "Use fonte/ e destino/ para controlar exatamente o nível copiado."},
+    {"id": "obsolete-removed", "label": "O item obsoleto foi removido do destino", "command": "test ! -e /home/aluno/rsync-lab/destino/obsoleto.txt && grep -Fq 'deleting obsoleto.txt' /home/aluno/rsync-lab/sincronizacao.txt", "failureMessage": "Aplique a sincronização revisada com --delete."},
+    {"id": "trees-synchronized", "label": "Fonte e destino estão idênticos", "command": "diff -r /home/aluno/rsync-lab/fonte /home/aluno/rsync-lab/destino >/dev/null", "failureMessage": "As árvores ainda diferem; revise plano.txt e execute o rsync real."}
+  ],
+  "smokeCommands": ["rsync -avn --delete fonte/ destino/ > plano.txt", "rsync -av --delete fonte/ destino/ > sincronizacao.txt", "diff -r fonte destino"]
+}

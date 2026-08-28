@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "distro-repositorios-pacotes",
+  "curriculumId": "M10-L01",
+  "moduleId": "M10",
+  "level": "intermediario",
+  "order": 45,
+  "prerequisites": ["sincronizar-com-rsync"],
+  "eyebrow": "Ecossistema de pacotes",
+  "title": "Reconheça distribuição e repositórios",
+  "summary": "Relacione a distribuição Debian, o gerenciador apt e as fontes configuradas no sistema.",
+  "duration": "11 min",
+  "objective": "Identificar distribuição, gerenciador, repositórios e origem de uma versão instalada.",
+  "concepts": [
+    "A distribuição integra kernel, bibliotecas, políticas e repositórios; o gerenciador resolve pacotes dentro desse ecossistema.",
+    "apt trabalha com fontes configuradas e metadados locais; dpkg mantém o estado dos pacotes instalados no Debian."
+  ],
+  "examples": [
+    {"command": "cat /etc/os-release", "explanation": "Mostra identidade e versão da distribuição."},
+    {"command": "grep -RhsE '^(Types:|URIs:|Suites:)' /etc/apt/sources.list.d", "explanation": "Resume fontes apt no formato deb822."},
+    {"command": "apt-cache policy nano", "explanation": "Compara versão instalada, candidata e suas prioridades."}
+  ],
+  "taskIntro": "Produza um pequeno diagnóstico do sistema de pacotes deste laboratório.",
+  "steps": [
+    "Grave as primeiras informações de /etc/os-release em sistema.txt.",
+    "Localize apt com command -v e grave o caminho em gerenciador.txt.",
+    "Resuma tipos, URIs e suites das fontes em repositorios.txt.",
+    "Grave apt-cache policy nano em politica.txt."
+  ],
+  "hints": [
+    "ID=debian identifica a família deste contêiner.",
+    "command -v mostra o executável que o shell usaria.",
+    "As fontes Debian atuais podem estar em arquivos .sources, não apenas sources.list.",
+    "Uma versão instalada pode aparecer com prioridade 100 mesmo sem índices baixados."
+  ],
+  "startingDirectory": "/home/aluno/pacotes-base",
+  "setupCommand": "mkdir -p /home/aluno/pacotes-base",
+  "checks": [
+    {"id": "distribution-identified", "label": "A distribuição Debian foi identificada", "command": "grep -Fxq 'ID=debian' /home/aluno/pacotes-base/sistema.txt && grep -q 'VERSION_ID=\"12\"' /home/aluno/pacotes-base/sistema.txt", "failureMessage": "Grave informações suficientes de /etc/os-release em sistema.txt."},
+    {"id": "manager-located", "label": "O executável apt foi localizado", "command": "grep -Fxq '/usr/bin/apt' /home/aluno/pacotes-base/gerenciador.txt", "failureMessage": "Use command -v apt e grave o caminho em gerenciador.txt."},
+    {"id": "repositories-inspected", "label": "As fontes Debian foram registradas", "command": "grep -Fq 'Types: deb' /home/aluno/pacotes-base/repositorios.txt && grep -Fq 'URIs: http://deb.debian.org/debian' /home/aluno/pacotes-base/repositorios.txt", "failureMessage": "Consulte sources.list e os arquivos de sources.list.d em repositorios.txt."},
+    {"id": "package-policy-read", "label": "A política do pacote nano foi consultada", "command": "grep -Eq '^  Installed: [^ ]+$' /home/aluno/pacotes-base/politica.txt && ! grep -Fq 'Installed: (none)' /home/aluno/pacotes-base/politica.txt && grep -Eq 'apt-cache[[:space:]]+policy[[:space:]]+nano' /home/aluno/.lesson_history", "failureMessage": "Execute apt-cache policy nano e grave o resultado em politica.txt."}
+  ],
+  "smokeCommands": ["sed -n '1,8p' /etc/os-release > sistema.txt", "command -v apt > gerenciador.txt", "grep -RhsE '^(deb |Types:|URIs:|Suites:)' /etc/apt/sources.list /etc/apt/sources.list.d 2>/dev/null > repositorios.txt", "apt-cache policy nano > politica.txt"]
+}

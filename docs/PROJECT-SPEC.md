@@ -2,7 +2,7 @@
 
 > Status: ativo
 >
-> Última atualização: 2026-08-02
+> Última atualização: 2026-08-27
 >
 > Repositório: `https://github.com/eletromindbrasil/linux-tutor`
 >
@@ -98,7 +98,7 @@ O aprendizado acontece por prática:
 |---|---|---|---|
 | SYS-001 | Aplicação React/Vite servida localmente | done | build Docker e health check |
 | SYS-002 | Backend Node/Express com autenticação | done | login, sessão, logout e troca de senha |
-| SYS-003 | Terminal web com xterm.js e WebSocket | done | smoke test das 40 lições |
+| SYS-003 | Terminal web com xterm.js e WebSocket | done | smoke test das 48 lições |
 | SYS-004 | Terminal conectado a Debian real | done | comandos executados no sandbox |
 | SYS-005 | Contêiner descartável por sessão de lição | done | criação e remoção pela API |
 | SYS-006 | Sandbox sem rede e com limites de CPU, memória, processos e capabilities | done | configuração Dockerode |
@@ -174,6 +174,14 @@ por revisão didática antes de ser considerado definitivo.
 | M08-L03 | `jobs-foreground-background` | Alterne entre foreground e background | done-prototype |
 | M08-L04 | `sinais-processos` | Envie sinais a processos | done-prototype |
 | M08-L05 | `nohup-sessoes` | Proteja uma tarefa com nohup | done-prototype |
+| M09-L01 | `arquivos-tar-compressao` | Empacote e comprima com tar | done-prototype |
+| M09-L02 | `zip-extracao-segura` | Inspecione antes de extrair um ZIP | done-prototype |
+| M09-L03 | `checksums-integridade` | Detecte alterações com SHA-256 | done-prototype |
+| M09-L04 | `sincronizar-com-rsync` | Planeje e aplique uma sincronização | done-prototype |
+| M10-L01 | `distro-repositorios-pacotes` | Reconheça distribuição e repositórios | done-prototype |
+| M10-L02 | `apt-operacoes-seguras` | Planeje operações apt sem alterar o sistema | done-prototype |
+| M10-L03 | `inspecionar-pacotes-dpkg` | Investigue pacotes com dpkg | done-prototype |
+| M10-L04 | `formatos-portateis` | Compare AppImage, Flatpak e Snap | done-prototype |
 
 ### 4.3 Estrutura atual relevante
 
@@ -213,7 +221,7 @@ LinuxTutor/
 - O app monta o socket do Docker; a publicação deve permanecer em loopback atrás de proxy HTTPS.
 - Não há recuperação de senha por e-mail; uma redefinição administrativa ainda exige acesso ao banco.
 - O contêiner padrão não serve para tarefas reais de boot, kernel, systemd, discos ou root amplo.
-- A qualidade pedagógica final das 40 aulas ainda não foi formalmente revisada.
+- A qualidade pedagógica final das 48 aulas ainda não foi formalmente revisada.
 
 ## 5. Arquitetura alvo
 
@@ -333,7 +341,7 @@ Status: **concluída**.
 Status: **em andamento**.
 
 - ENG-001, ENG-002 e ENG-004 concluídos.
-- Quarenta lições usam arquivos individuais com schema v1.
+- Quarenta e oito lições usam arquivos individuais com schema v1.
 - Catálogo e soluções de referência são validados por comandos próprios.
 - Regras de autoria estão documentadas em `content/README.md`.
 - ENG-003 permanece parcial: checks ainda são comandos shell, não tipos declarativos.
@@ -434,14 +442,14 @@ Status: **em andamento**.
 
 | ID | Tópico da lição | Status |
 |---|---|---|
-| M09-L01 | Compactação e arquivos com `tar`, `gzip`, `bzip2` e `xz` | planned |
-| M09-L02 | ZIP, extração segura e inspeção antes de extrair | planned |
-| M09-L03 | Checksums com `sha256sum` e verificação de integridade | planned |
-| M09-L04 | Sincronização e cópia eficiente com `rsync` | planned |
-| M10-L01 | Distribuições, repositórios e gerenciadores de pacotes | planned |
-| M10-L02 | `apt`: buscar, instalar, atualizar e remover | planned |
-| M10-L03 | Dependências, pacotes, arquivos e versões instaladas | planned |
-| M10-L04 | Formatos portáteis: noções de Snap, Flatpak e AppImage | planned |
+| M09-L01 | Compactação e arquivos com `tar`, `gzip`, `bzip2` e `xz` | done-prototype |
+| M09-L02 | ZIP, extração segura e inspeção antes de extrair | done-prototype |
+| M09-L03 | Checksums com `sha256sum` e verificação de integridade | done-prototype |
+| M09-L04 | Sincronização e cópia eficiente com `rsync` | done-prototype |
+| M10-L01 | Distribuições, repositórios e gerenciadores de pacotes | done-prototype |
+| M10-L02 | `apt`: buscar, instalar, atualizar e remover | done-prototype |
+| M10-L03 | Dependências, pacotes, arquivos e versões instaladas | done-prototype |
+| M10-L04 | Formatos portáteis: noções de Snap, Flatpak e AppImage | done-prototype |
 | M11-L01 | Interfaces, endereços e rotas com `ip` | planned |
 | M11-L02 | DNS com `dig`, `host` e `resolvectl` | planned |
 | M11-L03 | Testes de conectividade com `ping` e `traceroute` | planned |
@@ -532,8 +540,8 @@ Na próxima sequência, priorizar:
 1. Concluir ENG-003 com verificadores declarativos para os tipos já necessários.
 2. M00-L01 a M00-L03 — onboarding e segurança.
 3. Validar didaticamente a trilha iniciante inteira antes de ampliar o volume intermediário.
-4. M09 — compactação, ZIP, checksums e sincronização com `rsync`.
-5. M10 — conceitos de pacotes e exercícios compatíveis com o laboratório não privilegiado.
+4. M11 — rede com loopback, serviços locais e fixtures, sem liberar acesso externo do sandbox.
+5. M12-L01 e M12-L02 — informações do sistema e logs compatíveis com o contêiner não privilegiado.
 
 Não produzir dezenas de conteúdos antes de o schema, o validador e o test runner de lições
 estarem estáveis.
@@ -602,3 +610,4 @@ O serviço `app` deve aparecer como `healthy`.
 | 2026-08-27 | Automatizado deploy da stack original em `linux.eletrovps.com` via GitHub Actions e Portainer. |
 | 2026-08-27 | Implantadas 20 novas lições, concluindo M03, M04, M05 e M06 até permissões padrão. |
 | 2026-08-27 | Concluídos M06, M07 e M08 com 11 lições sobre menor privilégio, shell e processos. |
+| 2026-08-27 | Concluídos M09 e M10 com 8 lições sobre arquivos, integridade, sincronização e pacotes seguros. |

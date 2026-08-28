@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "inspecionar-pacotes-dpkg",
+  "curriculumId": "M10-L03",
+  "moduleId": "M10",
+  "level": "intermediario",
+  "order": 47,
+  "prerequisites": ["apt-operacoes-seguras"],
+  "eyebrow": "Metadados de pacotes",
+  "title": "Investigue pacotes com dpkg",
+  "summary": "Descubra versão, dependências, arquivos e o pacote proprietário de um caminho já instalado.",
+  "duration": "12 min",
+  "objective": "Consultar o banco local do dpkg sem instalar, remover ou atualizar pacotes.",
+  "concepts": [
+    "dpkg-query lê o banco de pacotes instalados; apt acrescenta repositórios e resolução de dependências sobre essa base.",
+    "Listar arquivos e descobrir seu pacote proprietário ajuda a diagnosticar versões, conflitos e origem de executáveis."
+  ],
+  "examples": [
+    {"command": "dpkg-query -W coreutils", "explanation": "Mostra que coreutils está instalado e sua versão."},
+    {"command": "dpkg-query -L coreutils", "explanation": "Lista caminhos fornecidos pelo pacote."},
+    {"command": "dpkg -S /bin/ls", "explanation": "Descobre qual pacote registrou esse arquivo."}
+  ],
+  "taskIntro": "Crie um dossiê local do pacote coreutils usando apenas consultas.",
+  "steps": [
+    "Grave pacote e versão de coreutils em versao.tsv com formato personalizado.",
+    "Grave Pre-Depends e Depends em dependencias.txt.",
+    "Liste todos os arquivos do pacote em arquivos.txt.",
+    "Descubra o proprietário de /bin/ls e grave em proprietario.txt."
+  ],
+  "hints": [
+    "Use -f com os campos ${Package} e ${Version} entre aspas simples.",
+    "Combine ${Pre-Depends} e ${Depends} para cobrir os dois tipos de relação.",
+    "A opção -L recebe o nome do pacote instalado.",
+    "dpkg -S pesquisa um caminho no banco local."
+  ],
+  "startingDirectory": "/home/aluno/dpkg-lab",
+  "setupCommand": "mkdir -p /home/aluno/dpkg-lab",
+  "checks": [
+    {"id": "version-recorded", "label": "Pacote e versão foram registrados", "command": "grep -Eq '^coreutils[[:space:]]+[^[:space:]]+$' /home/aluno/dpkg-lab/versao.tsv", "failureMessage": "Use dpkg-query -W com os campos Package e Version em versao.tsv."},
+    {"id": "dependencies-recorded", "label": "As dependências do pacote foram registradas", "command": "grep -Fq 'libc6' /home/aluno/dpkg-lab/dependencias.txt && grep -Fq 'libselinux1' /home/aluno/dpkg-lab/dependencias.txt", "failureMessage": "Consulte Pre-Depends e Depends de coreutils em dependencias.txt."},
+    {"id": "files-listed", "label": "Os arquivos fornecidos pelo pacote foram listados", "command": "grep -Fxq '/bin/ls' /home/aluno/dpkg-lab/arquivos.txt && grep -Fxq '/usr/bin/sha256sum' /home/aluno/dpkg-lab/arquivos.txt", "failureMessage": "Execute dpkg-query -L coreutils e grave a lista completa."},
+    {"id": "owner-found", "label": "O pacote proprietário de /bin/ls foi identificado", "command": "grep -Fxq 'coreutils: /bin/ls' /home/aluno/dpkg-lab/proprietario.txt && grep -Eq 'dpkg[[:space:]]+-S[[:space:]]+/bin/ls' /home/aluno/.lesson_history", "failureMessage": "Use dpkg -S /bin/ls e grave a resposta em proprietario.txt."}
+  ],
+  "smokeCommands": ["dpkg-query -W -f='${Package}\\t${Version}\\n' coreutils > versao.tsv", "dpkg-query -W -f='${Pre-Depends}${Depends}\\n' coreutils > dependencias.txt", "dpkg-query -L coreutils > arquivos.txt", "dpkg -S /bin/ls > proprietario.txt"]
+}

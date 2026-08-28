@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "checksums-integridade",
+  "curriculumId": "M09-L03",
+  "moduleId": "M09",
+  "level": "intermediario",
+  "order": 43,
+  "prerequisites": ["zip-extracao-segura"],
+  "eyebrow": "Integridade de arquivos",
+  "title": "Detecte alterações com SHA-256",
+  "summary": "Calcule e valide checksums para diferenciar uma cópia íntegra de um arquivo alterado.",
+  "duration": "11 min",
+  "objective": "Gerar um manifesto SHA-256, validá-lo e comprovar que uma alteração é detectada.",
+  "concepts": [
+    "Um checksum resume o conteúdo: qualquer mudança tende a produzir outro valor, mas isso não prova autoria ou confiança na origem.",
+    "sha256sum -c lê um manifesto e compara o hash esperado com o arquivo atual."
+  ],
+  "examples": [
+    {"command": "sha256sum imagem.bin > SHA256SUMS", "explanation": "Gera um manifesto com hash e nome do arquivo."},
+    {"command": "sha256sum -c SHA256SUMS", "explanation": "Confirma se o conteúdo ainda corresponde ao manifesto."},
+    {"command": "printf x >> imagem.bin", "explanation": "Simula uma alteração que deverá invalidar o checksum anterior."}
+  ],
+  "taskIntro": "Valide a imagem original e depois registre a falha esperada de uma cópia corrompida.",
+  "steps": [
+    "Gere SHA256SUMS para imagem.bin.",
+    "Valide o manifesto e grave a saída em verificacao.txt.",
+    "Copie a imagem para alterada.bin e crie um manifesto que espere o conteúdo original nesse nome.",
+    "Acrescente dados à cópia e grave a falha de sha256sum -c em falha.txt."
+  ],
+  "hints": [
+    "O manifesto contém o hash, dois espaços e o nome do arquivo.",
+    "Use sed para trocar imagem.bin por alterada.bin no manifesto da cópia.",
+    "Redirecione stdout e stderr ao registrar a falha esperada.",
+    "Use || true somente para continuar após a falha intencional do teste."
+  ],
+  "startingDirectory": "/home/aluno/integridade",
+  "setupCommand": "mkdir -p /home/aluno/integridade && printf 'bloco-01: Linux Tutor\\nbloco-02: dados de exemplo\\n' > /home/aluno/integridade/imagem.bin",
+  "checks": [
+    {"id": "manifest-created", "label": "O manifesto SHA-256 corresponde à imagem original", "command": "cd /home/aluno/integridade && test -s SHA256SUMS && sha256sum -c SHA256SUMS >/dev/null", "failureMessage": "Gere SHA256SUMS novamente a partir de imagem.bin."},
+    {"id": "original-verified", "label": "A verificação da imagem original foi registrada", "command": "grep -Fxq 'imagem.bin: OK' /home/aluno/integridade/verificacao.txt", "failureMessage": "Execute sha256sum -c SHA256SUMS e grave a saída em verificacao.txt."},
+    {"id": "corruption-detected", "label": "A alteração da cópia foi detectada", "command": "grep -Fq 'alterada.bin: FAILED' /home/aluno/integridade/falha.txt && ! sha256sum -c /home/aluno/integridade/esperado-alterada.sha256 >/dev/null 2>&1", "failureMessage": "Crie a expectativa antes de alterar alterada.bin e registre a falha posterior."},
+    {"id": "checksum-practiced", "label": "Você praticou geração e validação de checksums", "command": "grep -Eq 'sha256sum[[:space:]]+imagem\\.bin[[:space:]]*>[[:space:]]*SHA256SUMS' /home/aluno/.lesson_history && grep -Eq 'sha256sum[[:space:]]+-c[[:space:]]+SHA256SUMS' /home/aluno/.lesson_history", "failureMessage": "Use sha256sum para gerar o manifesto e sha256sum -c para validá-lo."}
+  ],
+  "smokeCommands": ["sha256sum imagem.bin > SHA256SUMS", "sha256sum -c SHA256SUMS > verificacao.txt", "cp imagem.bin alterada.bin", "sha256sum imagem.bin | sed 's/imagem.bin/alterada.bin/' > esperado-alterada.sha256", "printf 'corrupcao\\n' >> alterada.bin", "sha256sum -c esperado-alterada.sha256 > falha.txt 2>&1 || true"]
+}

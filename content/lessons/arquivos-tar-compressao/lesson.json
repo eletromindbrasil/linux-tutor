@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "arquivos-tar-compressao",
+  "curriculumId": "M09-L01",
+  "moduleId": "M09",
+  "level": "intermediario",
+  "order": 41,
+  "prerequisites": ["nohup-sessoes"],
+  "eyebrow": "Arquivamento e compactação",
+  "title": "Empacote e comprima com tar",
+  "summary": "Separe o empacotamento feito por tar da compressão aplicada por gzip, bzip2 ou xz.",
+  "duration": "14 min",
+  "objective": "Criar um arquivo tar, inspecionar seu conteúdo e validar três formatos de compressão.",
+  "concepts": [
+    "tar reúne uma árvore de arquivos preservando caminhos e metadados; compactadores transformam o fluxo resultante.",
+    "gzip costuma priorizar velocidade, enquanto bzip2 e xz podem reduzir mais o tamanho com maior custo de processamento."
+  ],
+  "examples": [
+    {"command": "tar -cf projeto.tar projeto/", "explanation": "Cria um arquivo não comprimido com a árvore projeto."},
+    {"command": "tar -tf projeto.tar", "explanation": "Lista o conteúdo sem extrair."},
+    {"command": "gzip -k projeto.tar", "explanation": "Cria projeto.tar.gz e mantém o tar original."}
+  ],
+  "taskIntro": "Arquive o projeto de exemplo e produza cópias válidas nos três formatos de compressão.",
+  "steps": [
+    "Crie pacote.tar contendo o diretório projeto.",
+    "Liste o conteúdo do tar em conteudo.txt antes de extrair qualquer coisa.",
+    "Use gzip, bzip2 e xz com a opção de manter o arquivo de entrada.",
+    "Teste a integridade dos três arquivos compactados."
+  ],
+  "hints": [
+    "Em tar, -c cria, -f escolhe o arquivo e -t lista.",
+    "A opção -k evita que o compactador remova pacote.tar.",
+    "Os testes de integridade são gzip -t, bzip2 -t e xz -t.",
+    "Compactação não substitui backup nem verificação de integridade."
+  ],
+  "startingDirectory": "/home/aluno/compactacao",
+  "setupCommand": "mkdir -p /home/aluno/compactacao/projeto/docs /home/aluno/compactacao/projeto/config && printf 'Linux Tutor\\n' > /home/aluno/compactacao/projeto/README.txt && printf 'guia de operacao\\n' > /home/aluno/compactacao/projeto/docs/guia.txt && printf 'modo=seguro\\n' > /home/aluno/compactacao/projeto/config/app.conf",
+  "checks": [
+    {"id": "tar-created", "label": "O arquivo tar contém toda a árvore do projeto", "command": "test -s /home/aluno/compactacao/pacote.tar && tar -tf /home/aluno/compactacao/pacote.tar | grep -Fxq 'projeto/README.txt' && tar -tf /home/aluno/compactacao/pacote.tar | grep -Fxq 'projeto/docs/guia.txt' && tar -tf /home/aluno/compactacao/pacote.tar | grep -Fxq 'projeto/config/app.conf'", "failureMessage": "Crie pacote.tar a partir do diretório projeto completo."},
+    {"id": "contents-inspected", "label": "O conteúdo foi listado sem extração", "command": "grep -Fxq 'projeto/README.txt' /home/aluno/compactacao/conteudo.txt && grep -Eq 'tar[[:space:]]+-tf[[:space:]]+pacote\\.tar' /home/aluno/.lesson_history", "failureMessage": "Execute tar -tf pacote.tar e grave a listagem em conteudo.txt."},
+    {"id": "compressed-formats", "label": "Os três arquivos compactados foram criados", "command": "test -s /home/aluno/compactacao/pacote.tar.gz && test -s /home/aluno/compactacao/pacote.tar.bz2 && test -s /home/aluno/compactacao/pacote.tar.xz", "failureMessage": "Crie as cópias .gz, .bz2 e .xz mantendo pacote.tar."},
+    {"id": "archives-valid", "label": "Os três formatos passam na verificação de integridade", "command": "gzip -t /home/aluno/compactacao/pacote.tar.gz && bzip2 -t /home/aluno/compactacao/pacote.tar.bz2 && xz -t /home/aluno/compactacao/pacote.tar.xz", "failureMessage": "Um dos arquivos compactados está inválido; recrie-o com o compactador correspondente."}
+  ],
+  "smokeCommands": ["tar -cf pacote.tar projeto", "tar -tf pacote.tar > conteudo.txt", "gzip -k pacote.tar", "bzip2 -k pacote.tar", "xz -k pacote.tar", "gzip -t pacote.tar.gz", "bzip2 -t pacote.tar.bz2", "xz -t pacote.tar.xz"]
+}

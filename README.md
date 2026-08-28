@@ -9,7 +9,7 @@ A visão, o estado de implementação, o backlog e o mapa curricular canônico e
 [`docs/PROJECT-SPEC.md`](docs/PROJECT-SPEC.md). Novas threads devem ler essa spec antes de
 alterar o projeto.
 
-Este protótipo contém 40 lições, organizadas em oito módulos:
+Este protótipo contém 48 lições, organizadas em dez módulos:
 
 1. Fundamentos do terminal, navegação, caminhos, listagens e ajuda local.
 2. Criação, organização, remoção e links de arquivos, além da estrutura Linux.
@@ -19,6 +19,8 @@ Este protótipo contém 40 lições, organizadas em oito módulos:
 6. Identidade, grupos, permissões, ownership, `umask`, `sudo` e menor privilégio.
 7. Variáveis, aspas, globbing, `PATH`, aliases, funções e histórico do shell.
 8. Processos, PIDs, monitoramento, jobs, sinais e tarefas persistentes com `nohup`.
+9. Arquivamento, compressão, ZIP, checksums e sincronização com `rsync`.
+10. Distribuições, repositórios, operações seguras com `apt`, `dpkg` e formatos portáteis.
 
 As aulas ficam em `content/lessons/<id>/lesson.json`. Para validar o catálogo:
 
@@ -71,7 +73,7 @@ de entrada público e precisa encaminhar upgrades WebSocket.
 
 Cada push na branch `main` executa o workflow `.github/workflows/deploy-production.yml`. Ele usa a
 API do Portainer da VPS original para construir imagens vinculadas ao commit, atualizar a stack
-Swarm `linux-tutor` e validar autenticação, troca de senha e os terminais das 40 lições. O ambiente
+Swarm `linux-tutor` e validar autenticação, troca de senha e os terminais das 48 lições. O ambiente
 público é <https://linux.eletrovps.com>.
 
 As credenciais do Portainer ficam no environment `production` do GitHub. O PostgreSQL usa volume e

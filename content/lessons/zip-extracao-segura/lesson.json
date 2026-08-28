@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "zip-extracao-segura",
+  "curriculumId": "M09-L02",
+  "moduleId": "M09",
+  "level": "intermediario",
+  "order": 42,
+  "prerequisites": ["arquivos-tar-compressao"],
+  "eyebrow": "Arquivos ZIP",
+  "title": "Inspecione antes de extrair um ZIP",
+  "summary": "Crie, liste e extraia um ZIP em destino separado, conferindo seu conteúdo antes de escrever arquivos.",
+  "duration": "12 min",
+  "objective": "Usar zip e unzip com um fluxo de inspeção e extração controlada.",
+  "concepts": [
+    "unzip -l permite revisar nomes e caminhos antes da extração; arquivos desconhecidos não devem ser extraídos às cegas.",
+    "Extrair em um diretório novo limita colisões e facilita comparar o resultado com a origem."
+  ],
+  "examples": [
+    {"command": "zip -r pacote.zip entrega/", "explanation": "Compacta recursivamente o diretório entrega."},
+    {"command": "unzip -l pacote.zip", "explanation": "Mostra o inventário sem criar arquivos."},
+    {"command": "unzip pacote.zip -d restaurado/", "explanation": "Extrai para um destino explícito."}
+  ],
+  "taskIntro": "Crie um ZIP da entrega, inspecione-o e só então restaure os arquivos em outro diretório.",
+  "steps": [
+    "Crie pacote.zip com o diretório entrega.",
+    "Grave a saída de unzip -l em inventario.txt antes da extração.",
+    "Crie restaurado e extraia o pacote para esse diretório.",
+    "Compare entrega com restaurado/entrega e grave o resultado em diferencas.txt."
+  ],
+  "hints": [
+    "Use zip -r para incluir subdiretórios.",
+    "A opção -l de unzip apenas lista; ela deve aparecer antes da extração no histórico.",
+    "Use -d para escolher um diretório de destino vazio.",
+    "diff -r não imprime nada quando as duas árvores são iguais."
+  ],
+  "startingDirectory": "/home/aluno/zip-lab",
+  "setupCommand": "mkdir -p /home/aluno/zip-lab/entrega/dados && printf 'relatorio final\\n' > /home/aluno/zip-lab/entrega/relatorio.txt && printf 'id,valor\\n1,42\\n' > /home/aluno/zip-lab/entrega/dados/medidas.csv",
+  "checks": [
+    {"id": "zip-created", "label": "O ZIP contém os dois arquivos da entrega", "command": "test -s /home/aluno/zip-lab/pacote.zip && unzip -Z1 /home/aluno/zip-lab/pacote.zip | grep -Fxq 'entrega/relatorio.txt' && unzip -Z1 /home/aluno/zip-lab/pacote.zip | grep -Fxq 'entrega/dados/medidas.csv'", "failureMessage": "Crie pacote.zip incluindo todo o diretório entrega."},
+    {"id": "zip-inspected-first", "label": "O ZIP foi inspecionado antes da extração", "command": "history=/home/aluno/.lesson_history; listed=$(grep -nE 'unzip[[:space:]]+-l[[:space:]]+pacote\\.zip' \"$history\" | head -1 | cut -d: -f1); extracted=$(grep -nE 'unzip([[:space:]]+-q)?[[:space:]]+pacote\\.zip[[:space:]]+-d[[:space:]]+restaurado' \"$history\" | head -1 | cut -d: -f1); test -n \"$listed\" && test -n \"$extracted\" && test \"$listed\" -lt \"$extracted\" && grep -q 'relatorio.txt' /home/aluno/zip-lab/inventario.txt", "failureMessage": "Liste pacote.zip em inventario.txt antes de executar a extração."},
+    {"id": "zip-extracted", "label": "A entrega foi restaurada em diretório separado", "command": "test -f /home/aluno/zip-lab/restaurado/entrega/relatorio.txt && test -f /home/aluno/zip-lab/restaurado/entrega/dados/medidas.csv", "failureMessage": "Extraia pacote.zip para o diretório restaurado."},
+    {"id": "trees-match", "label": "Origem e restauração são idênticas", "command": "test -f /home/aluno/zip-lab/diferencas.txt && test ! -s /home/aluno/zip-lab/diferencas.txt && diff -r /home/aluno/zip-lab/entrega /home/aluno/zip-lab/restaurado/entrega >/dev/null", "failureMessage": "Compare as duas árvores e corrija qualquer diferença antes de verificar."}
+  ],
+  "smokeCommands": ["zip -qr pacote.zip entrega", "unzip -l pacote.zip > inventario.txt", "mkdir restaurado", "unzip -q pacote.zip -d restaurado", "diff -r entrega restaurado/entrega > diferencas.txt"]
+}
